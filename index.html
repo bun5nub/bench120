@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="BENCH120">
+<meta name="theme-color" content="#0e0f12">
+<title>BENCH 120 ｜ ピーキング</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700;800;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0e0f12; --surface:#15171d; --elevated:#1c1f27; --line:#2a2e38;
+  --text:#eceef2; --muted:#9298a4; --faint:#5f6671;
+  --accent:#ff6a3d; --accent-dim:#7a3a26;
+  --acc:#4a86d6; --int:#e0913a; --del:#5fb85a; --peak:#b56fe0; --test:#ff5252;
+  --ok:#5fb85a;
+  --safe-top:env(safe-area-inset-top); --safe-bot:env(safe-area-inset-bottom);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--text);
+  font-family:'Archivo',system-ui,-apple-system,sans-serif;
+  -webkit-text-size-adjust:100%;overscroll-behavior-y:none;}
+body{padding-bottom:calc(28px + var(--safe-bot));}
+.mono{font-family:'DM Mono',ui-monospace,monospace;}
+
+/* ---- Header ---- */
+header{position:sticky;top:0;z-index:50;
+  background:linear-gradient(180deg,#0e0f12 70%,rgba(14,15,18,.92));
+  padding:calc(12px + var(--safe-top)) 16px 12px;border-bottom:1px solid var(--line);
+  backdrop-filter:blur(8px);}
+.hrow{display:flex;align-items:baseline;justify-content:space-between;gap:8px;}
+.logo{font-weight:900;font-size:21px;letter-spacing:.5px;line-height:1;}
+.logo b{color:var(--accent);}
+.goal{font-family:'DM Mono';font-size:12px;color:var(--muted);}
+.goal s{color:var(--accent);text-decoration:none;font-weight:500;}
+.savetag{font-size:10px;color:var(--faint);}
+.bar{height:7px;border-radius:6px;background:var(--elevated);margin-top:11px;overflow:hidden;}
+.bar>i{display:block;height:100%;width:0;border-radius:6px;
+  background:linear-gradient(90deg,var(--accent),#ffae3d);transition:width .4s ease;}
+.barmeta{display:flex;justify-content:space-between;margin-top:6px;font-size:11px;color:var(--muted);}
+.barmeta .pct{font-family:'DM Mono';color:var(--text);font-weight:500;}
+
+/* ---- Toolbar ---- */
+.tools{display:flex;gap:8px;padding:12px 16px 4px;flex-wrap:wrap;}
+.tbtn{flex:1;min-width:84px;background:var(--surface);border:1px solid var(--line);
+  color:var(--text);font-family:inherit;font-size:12px;font-weight:600;
+  padding:10px 8px;border-radius:11px;cursor:pointer;text-align:center;}
+.tbtn:active{background:var(--elevated);}
+.tbtn.go{background:var(--accent);border-color:var(--accent);color:#170a05;}
+
+.legend{display:flex;gap:6px;flex-wrap:wrap;padding:8px 16px 4px;}
+.lg{font-size:10px;color:var(--muted);display:flex;align-items:center;gap:4px;}
+.lg i{width:9px;height:9px;border-radius:3px;display:inline-block;}
+
+/* ---- Week card ---- */
+main{padding:8px 12px;}
+.wk{background:var(--surface);border:1px solid var(--line);border-radius:16px;
+  margin:10px 0;overflow:hidden;border-left:4px solid var(--phase);}
+.wkhead{display:flex;align-items:center;gap:10px;padding:15px 14px;cursor:pointer;}
+.wkhead .ttl{flex:1;min-width:0;}
+.wkhead .lab{font-weight:800;font-size:14.5px;line-height:1.25;}
+.wkhead .phase{font-size:10.5px;color:var(--phase);font-weight:700;letter-spacing:.4px;margin-top:2px;}
+.wkprog{font-family:'DM Mono';font-size:12px;color:var(--muted);white-space:nowrap;}
+.wkprog.done{color:var(--ok);}
+.chev{color:var(--faint);font-size:13px;transition:transform .25s;}
+.wk.open .chev{transform:rotate(90deg);}
+.wkdone-badge{display:none;}
+.wk.alldone{border-left-color:var(--ok);}
+.wk.alldone .wkhead .lab::after{content:" ✓";color:var(--ok);}
+
+.wkbody{display:none;padding:0 14px 14px;}
+.wk.open .wkbody{display:block;animation:fade .25s;}
+@keyframes fade{from{opacity:0;transform:translateY(-4px);}to{opacity:1;}}
+.intro{font-size:12px;color:var(--muted);line-height:1.5;background:var(--elevated);
+  border-radius:10px;padding:9px 11px;margin-bottom:12px;}
+
+/* ---- Day ---- */
+.day{margin-top:14px;}
+.dayhead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;}
+.dayname{font-weight:700;font-size:13px;color:var(--text);}
+.dateinp{background:var(--elevated);border:1px solid var(--line);color:var(--text);
+  font-family:'DM Mono';font-size:12px;border-radius:9px;padding:7px 9px;min-width:140px;}
+.dateinp::-webkit-date-and-time-value{text-align:left;}
+
+.ex{display:flex;align-items:flex-start;gap:11px;padding:11px 4px;border-top:1px solid var(--line);}
+.ex:first-of-type{border-top:none;}
+.chk{flex:none;width:26px;height:26px;border-radius:8px;border:2px solid var(--faint);
+  margin-top:1px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:.15s;background:transparent;}
+.chk svg{width:15px;height:15px;stroke:#170a05;stroke-width:3.5;fill:none;
+  stroke-linecap:round;stroke-linejoin:round;opacity:0;}
+.ex.done .chk{background:var(--accent);border-color:var(--accent);}
+.ex.done .chk svg{opacity:1;}
+.exmain{flex:1;min-width:0;}
+.exname{font-size:13.5px;font-weight:600;line-height:1.3;}
+.ex.done .exname{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--accent-dim);}
+.exnums{font-family:'DM Mono';font-size:12.5px;color:var(--accent);margin-top:3px;}
+.exnums .lt{color:var(--muted);}
+.exnums.speed{color:var(--int);}
+.exnums.warm{color:var(--muted);}
+.rpe{flex:none;font-family:'DM Mono';font-size:11px;font-weight:500;color:var(--muted);
+  border:1px solid var(--line);border-radius:7px;padding:3px 6px;margin-top:1px;white-space:nowrap;}
+.actual{margin-top:6px;}
+.actual input{width:100%;background:var(--bg);border:1px solid var(--line);color:var(--text);
+  font-family:'DM Mono';font-size:12px;border-radius:8px;padding:6px 9px;}
+.actual input::placeholder{color:var(--faint);}
+.memo{font-size:11.5px;color:var(--faint);line-height:1.5;margin-top:11px;
+  padding-left:11px;border-left:2px solid var(--line);}
+.rest .exnums{display:none;}
+
+.note{font-size:11px;color:var(--faint);text-align:center;padding:22px 24px;line-height:1.6;}
+.note a{color:var(--muted);}
+#file{display:none;}
+.toast{position:fixed;left:50%;bottom:calc(24px + var(--safe-bot));transform:translateX(-50%) translateY(20px);
+  background:var(--accent);color:#170a05;font-weight:700;font-size:13px;padding:10px 20px;border-radius:30px;
+  opacity:0;transition:.3s;z-index:100;pointer-events:none;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+<header>
+  <div class="hrow">
+    <div class="logo">BENCH <b>120</b></div>
+    <div class="goal"><span id="dispmax">115</span>kg → <s>120kg</s></div>
+  </div>
+  <div class="bar"><i id="barfill"></i></div>
+  <div class="barmeta">
+    <span><span class="pct" id="pctlabel">0%</span> 完了</span>
+    <span class="savetag" id="savetag">✓ 自動保存</span>
+  </div>
+</header>
+
+<div class="tools">
+  <button class="tbtn go" onclick="jumpNext()">次の未完了へ</button>
+  <button class="tbtn" onclick="exportData()">バックアップ書出</button>
+  <button class="tbtn" onclick="document.getElementById('file').click()">復元</button>
+  <button class="tbtn" onclick="resetAll()">リセット</button>
+  <input type="file" id="file" accept="application/json" onchange="importData(this)">
+</div>
+<div class="legend">
+  <span class="lg"><i style="background:var(--acc)"></i>蓄積</span>
+  <span class="lg"><i style="background:var(--int)"></i>強度</span>
+  <span class="lg"><i style="background:var(--del)"></i>デロード</span>
+  <span class="lg"><i style="background:var(--peak)"></i>ピーク</span>
+  <span class="lg"><i style="background:var(--test)"></i>テスト</span>
+</div>
+
+<main id="app"></main>
+<div class="note">
+  iPhoneでアプリ化:<br>Safariの共有ボタン → 「ホーム画面に追加」<br>
+  進捗は端末内に自動保存されます。機種変更や万一の消失に備え、時々「バックアップ書出」でファイルを保存してください。
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const C={acc:'var(--acc)',int:'var(--int)',del:'var(--del)',peak:'var(--peak)',test:'var(--test)'};
+const PROGRAM=[
+ {lab:"Week 1 ｜ 第1ブロック 蓄積期",ph:"蓄積期",c:C.acc,
+  intro:"量で土台構築・ボトム導入。RPEは『あと何回いけるか』。RPE7=余裕3回。",
+  days:[
+   {n:"Day1 量",lifts:[["ベンチ(コンペ)",90,5,4,"RPE7",1],["ナロー(CGBP)",77.5,8,3,"RPE7",1]],memo:"補助:バーベルローイング4×8 / ライイングEXT3×10"},
+   {n:"Day2 ボトム",lifts:[["スポトプレス(胸2cm上1秒静止)",82.5,5,4,"RPE7",1],["足上げベンチ",83.75,6,3,"RPE7",1]],memo:"スポト/ピンはRPE優先(変種MAX不明の為)。補助:懸垂 or ローイング4×8 / OHP3×6"},
+   {n:"Day3 初速",lifts:[["ピンプレス(胸高ピン・デッド)",90,3,5,"RPE7",1],["ダイナミックベンチ",57.5,3,6,"速度50%",2]],memo:"Day3は速度が目的。50%を全力で押し離す。RPEではなく初速で管理"},
+  ]},
+ {lab:"Week 2 ｜ 蓄積期",ph:"蓄積期",c:C.acc,intro:"微増。RPE7.5。",
+  days:[
+   {n:"Day1 量",lifts:[["ベンチ(コンペ)",92.5,5,4,"RPE7.5",1],["ナロー",80,8,3,"RPE7.5",1]],memo:"補助:ローイング4×8 / ライイングEXT3×10"},
+   {n:"Day2 ボトム",lifts:[["スポトプレス",85,5,4,"RPE8",1],["足上げベンチ",85,6,3,"RPE7.5",1]],memo:"補助:懸垂/ローイング4×8 / OHP3×6"},
+   {n:"Day3 初速",lifts:[["ピンプレス(胸高)",92.5,3,5,"RPE7.5",1],["ダイナミックベンチ",60,3,6,"速度52.5%",2]],memo:"初速重視"},
+  ]},
+ {lab:"Week 3 ｜ 蓄積期(ピーク量)",ph:"蓄積期",c:C.acc,intro:"本ブロック最大量。RPE8=余裕2回。",
+  days:[
+   {n:"Day1 量",lifts:[["ベンチ(コンペ)",93.75,5,4,"RPE8",1],["ナロー",81.25,8,3,"RPE8",1]],memo:"補助:ローイング4×8 / ライイングEXT3×10"},
+   {n:"Day2 ボトム",lifts:[["スポトプレス",86.25,5,4,"RPE8",1],["足上げベンチ",86.25,6,3,"RPE8",1]],memo:"補助:懸垂/ローイング4×8 / OHP3×6"},
+   {n:"Day3 初速",lifts:[["ピンプレス(胸高)",92.5,3,5,"RPE8",1],["ダイナミックベンチ",63.75,3,6,"速度55%",2]],memo:"初速重視"},
+  ]},
+ {lab:"Week 4 ｜ ★デロード(完全回復週)★",ph:"デロード",c:C.del,intro:"半分の量・軽負荷で疲労を抜く。絶対に追い込まない。",
+  days:[
+   {n:"Day1",lifts:[["ベンチ(コンペ)",75,5,2,"RPE5",1]],memo:"動きの確認のみ"},
+   {n:"Day2",lifts:[["足上げベンチ",70,5,2,"RPE5",1]],memo:"余裕を残す"},
+   {n:"Day3",lifts:[["ピンプレス(胸高)",75,3,3,"RPE5",1]],memo:"軽く初速だけ"},
+  ]},
+ {lab:"Week 5 ｜ 第2ブロック 強度期",ph:"強度期",c:C.int,intro:"重量帯へ(86%〜)。RPE8。ボトム特化を強化。",
+  days:[
+   {n:"Day1 強度",lifts:[["ベンチ(コンペ)",98.75,3,4,"RPE8",1],["ピンプレス(胸高)",95,3,3,"RPE8",1]],memo:"補助:ローイング4×6 / ライイングEXT3×8"},
+   {n:"Day2 ボトム",lifts:[["スポトプレス",90,3,4,"RPE8",1],["ナロー",88.75,5,3,"RPE8",1]],memo:"補助:懸垂/ローイング4×6"},
+   {n:"Day3 初速",lifts:[["ピンプレス(胸高・デッド)",95,2,5,"RPE8",1],["ダイナミックベンチ",70,3,6,"速度60%",2]],memo:"重い初速。爆発的に"},
+  ]},
+ {lab:"Week 6 ｜ 強度期",ph:"強度期",c:C.int,intro:"RPE8.5。",
+  days:[
+   {n:"Day1 強度",lifts:[["ベンチ(コンペ)",101.25,3,4,"RPE8.5",1],["ピンプレス(胸高)",98.75,2,3,"RPE8.5",1]],memo:"補助:ローイング4×6 / ライイングEXT3×8"},
+   {n:"Day2 ボトム",lifts:[["スポトプレス",92.5,3,4,"RPE8.5",1],["ナロー",90,5,3,"RPE8.5",1]],memo:"補助:懸垂/ローイング4×6"},
+   {n:"Day3 初速",lifts:[["ピンプレス(胸高・デッド)",98.75,2,5,"RPE8.5",1],["ダイナミックベンチ",72.5,3,6,"速度62.5%",2]],memo:"重い初速"},
+  ]},
+ {lab:"Week 7 ｜ 強度期(ピーク強度)",ph:"強度期",c:C.int,intro:"本ブロック最重。RPE9=余裕1回。",
+  days:[
+   {n:"Day1 強度",lifts:[["ベンチ(コンペ)",106.25,2,4,"RPE9",1],["ピンプレス(胸高)",101.25,2,3,"RPE9",1]],memo:"補助:ローイング4×6"},
+   {n:"Day2 ボトム",lifts:[["スポトプレス",95,2,4,"RPE9",1],["ナロー",93.75,4,3,"RPE9",1]],memo:"補助:懸垂/ローイング4×6"},
+   {n:"Day3 初速",lifts:[["ピンプレス(胸高・デッド)",101.25,2,4,"RPE9",1],["ダイナミックベンチ",75,3,5,"速度65%",2]],memo:"重い初速"},
+  ]},
+ {lab:"Week 8 ｜ ★デロード★",ph:"デロード",c:C.del,intro:"2回目の回復週。ピーキング前に疲労を完全に抜く。",
+  days:[
+   {n:"Day1",lifts:[["ベンチ(コンペ)",80,3,3,"RPE5",1]],memo:"軽く"},
+   {n:"Day2",lifts:[["スポトプレス",72.5,3,2,"RPE5",1]],memo:"軽く"},
+   {n:"Day3",lifts:[["ピンプレス(胸高)",80,2,3,"RPE5",1]],memo:"軽く初速"},
+  ]},
+ {lab:"Week 9 ｜ 第3ブロック ピーキング",ph:"ピーク",c:C.peak,intro:"量を絞り強度へ。疲労が抜け『隠れた筋力』が出始める。",
+  days:[
+   {n:"Day1 重",lifts:[["ベンチ(コンペフォーム)",106.25,2,3,"RPE9",1]],memo:"補助は最小(ローイング2×8のみ)"},
+   {n:"Day2 維持",lifts:[["ピンプレス(胸高)",95,2,3,"RPE8",1]],memo:"ボトム維持。追い込まない"},
+   {n:"Day3 技術",lifts:[["ダイナミックベンチ",75,3,4,"速度65%",2]],memo:"速度と技術のみ。疲労を残さない"},
+  ]},
+ {lab:"Week 10 ｜ ピーキング",ph:"ピーク",c:C.peak,intro:"単発中心。神経系を高重量に慣らす。",
+  days:[
+   {n:"Day1 重",lifts:[["ベンチ(コンペフォーム)",110,1,3,"RPE9",1]],memo:"1回ずつ丁寧に"},
+   {n:"Day2 維持",lifts:[["スポトプレス",90,2,2,"RPE7",1]],memo:"軽め維持"},
+   {n:"Day3 技術",lifts:[["ダイナミックベンチ",70,3,3,"速度60%",2]],memo:"完全に軽く"},
+  ]},
+ {lab:"Week 11 ｜ テーパー(調整)",ph:"ピーク",c:C.peak,intro:"量を大幅カット。重い単発で感覚だけ研ぐ。【最大は絶対に引かない】",
+  days:[
+   {n:"Day1 研ぎ",lifts:[["ベンチ(コンペフォーム)",107.5,1,2,"RPE8.5",1]],memo:"94%=RPE8.5。キレ重視。本番は来週。ここで最大を引くと疲労が戻る"},
+   {n:"Day2 軽",lifts:[["ダイナミックベンチ",70,3,2,"速度60%",2]],memo:"血流促進程度"},
+   {n:"Day3",lifts:[["完全休養 or 軽い有酸素",0,0,0,"休む",0]],memo:"休む勇気。ピーキングの肝"},
+  ]},
+ {lab:"Week 12 ｜ ★120kgアタック★",ph:"テスト",c:C.test,intro:"テスト日。各セット間3〜5分休む。下のウォームアップから順にチェック。",
+  days:[
+   {n:"Test",lifts:[
+     ["W-up①",60,3,1,"",3],["W-up②",80,3,1,"",3],["W-up③",95,2,1,"",3],["W-up④",105,1,1,"",3],
+     ["第1試技 opener",107.5,1,1,"RPE8",1],["第2試技",115,1,1,"RPE9.5",1],["★第3試技 本命★",120,1,1,"RPE10",1]],
+    memo:"opener107.5(93%)は確実に挙がる重量。120成功で余裕あれば122.5も可"},
+  ]},
+];
+
+const KEY="bench120_v2";
+let S={dates:{},checks:{},actuals:{},open:0};
+try{const r=localStorage.getItem(KEY); if(r)S=Object.assign(S,JSON.parse(r));}catch(e){}
+
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+function fmt(w){return (Number.isInteger(w)?w:w).toString();}
+
+const app=document.getElementById('app');
+function render(){
+  app.innerHTML='';
+  PROGRAM.forEach((wk,wi)=>{
+    const ids=[]; wk.days.forEach((d,di)=>d.lifts.forEach((l,li)=>ids.push(`${wi}_${di}_${li}`)));
+    const done=ids.filter(id=>S.checks[id]).length, tot=ids.length, all=done===tot&&tot>0;
+    const card=document.createElement('div');
+    card.className='wk'+(S.open===wi?' open':'')+(all?' alldone':'');
+    card.style.setProperty('--phase',wk.c);
+    let body=`<div class="intro">${wk.intro}</div>`;
+    wk.days.forEach((d,di)=>{
+      const dkey=`${wi}_${di}`;
+      body+=`<div class="day"><div class="dayhead"><span class="dayname">${d.n}</span>`+
+        `<input class="dateinp" type="date" value="${S.dates[dkey]||''}" onchange="setDate('${dkey}',this.value)"></div>`;
+      d.lifts.forEach((l,li)=>{
+        const id=`${wi}_${di}_${li}`, ck=!!S.checks[id];
+        const [name,w,reps,sets,rpe,kind]=l;
+        let nums='';
+        if(kind===0){nums='';}
+        else if(kind===3){nums=`<div class="exnums warm">${fmt(w)}<span class="lt">kg ×${reps}</span></div>`;}
+        else if(kind===2){nums=`<div class="exnums speed">${fmt(w)}<span class="lt">kg × ${reps}回 × ${sets}set</span></div>`;}
+        else{nums=`<div class="exnums">${fmt(w)}<span class="lt">kg × ${reps}回 × ${sets}set</span></div>`;}
+        const rpebadge=rpe?`<span class="rpe">${rpe}</span>`:'';
+        const actual=(kind===1)?`<div class="actual"><input type="text" placeholder="実測 (例: 92.5×5 楽だった)" value="${(S.actuals[id]||'').replace(/"/g,'&quot;')}" oninput="setAct('${id}',this.value)"></div>`:'';
+        body+=`<div class="ex${ck?' done':''}${kind===0?' rest':''}" >`+
+          `<div class="chk" onclick="toggle('${id}')"><svg viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg></div>`+
+          `<div class="exmain"><div class="exname">${name}</div>${nums}${actual}</div>${rpebadge}</div>`;
+      });
+      body+=`<div class="memo">${d.memo}</div></div>`;
+    });
+    card.innerHTML=`<div class="wkhead" onclick="toggleWk(${wi})">`+
+      `<div class="ttl"><div class="lab">${wk.lab}</div><div class="phase">${wk.ph}</div></div>`+
+      `<span class="wkprog${all?' done':''}">${done}/${tot}</span><span class="chev">▶</span></div>`+
+      `<div class="wkbody">${body}</div>`;
+    app.appendChild(card);
+  });
+  updateBar();
+}
+function updateBar(){
+  let done=0,tot=0;
+  PROGRAM.forEach((wk,wi)=>wk.days.forEach((d,di)=>d.lifts.forEach((l,li)=>{tot++; if(S.checks[`${wi}_${di}_${li}`])done++;})));
+  const p=tot?Math.round(done/tot*100):0;
+  document.getElementById('barfill').style.width=p+'%';
+  document.getElementById('pctlabel').textContent=p+'%';
+}
+function flash(){const t=document.getElementById('savetag'); t.textContent='✓ 保存しました'; t.style.color='var(--ok)';
+  clearTimeout(window._ft); window._ft=setTimeout(()=>{t.textContent='✓ 自動保存';t.style.color='';},1200);}
+function toggle(id){S.checks[id]=!S.checks[id]; if(!S.checks[id])delete S.checks[id]; save(); flash(); render();}
+function setDate(k,v){if(v)S.dates[k]=v;else delete S.dates[k]; save(); flash();}
+function setAct(id,v){if(v)S.actuals[id]=v;else delete S.actuals[id]; save();}
+function toggleWk(wi){S.open=(S.open===wi?-1:wi); save(); render();
+  if(S.open===wi){const el=app.children[wi]; setTimeout(()=>el.scrollIntoView({behavior:'smooth',block:'start'}),60);}}
+function jumpNext(){
+  for(let wi=0;wi<PROGRAM.length;wi++){const wk=PROGRAM[wi];let inc=false;
+    wk.days.forEach((d,di)=>d.lifts.forEach((l,li)=>{if(!S.checks[`${wi}_${di}_${li}`])inc=true;}));
+    if(inc){S.open=wi;save();render();const el=app.children[wi];setTimeout(()=>el.scrollIntoView({behavior:'smooth',block:'start'}),60);return;}}
+  toast('全メニュー完了！お疲れさまでした');
+}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1900);}
+function exportData(){
+  const blob=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='bench120_backup_'+new Date().toISOString().slice(0,10)+'.json';
+  document.body.appendChild(a);a.click();a.remove();toast('バックアップを書き出しました');
+}
+function importData(inp){const f=inp.files[0];if(!f)return;const r=new FileReader();
+  r.onload=e=>{try{const d=JSON.parse(e.target.result);S=Object.assign({dates:{},checks:{},actuals:{},open:0},d);save();render();toast('復元しました');}catch(err){toast('読み込み失敗');}};
+  r.readAsText(f);inp.value='';}
+function resetAll(){if(confirm('全ての日付・チェック・実測を消去します。よろしいですか？')){S={dates:{},checks:{},actuals:{},open:0};save();render();toast('リセットしました');}}
+render();
+</script>
+</body>
+</html>
