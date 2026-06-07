@@ -120,6 +120,32 @@ main{padding:8px 12px;}
   background:var(--accent);color:#170a05;font-weight:700;font-size:13px;padding:10px 20px;border-radius:30px;
   opacity:0;transition:.3s;z-index:100;pointer-events:none;}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* ---- 種目説明 (info sheet) ---- */
+.exname.tappable{cursor:pointer;}
+.exname .info{display:inline-block;margin-left:7px;font-size:10.5px;color:var(--accent);
+  border:1px solid var(--accent-dim);border-radius:6px;padding:1px 6px;vertical-align:middle;font-weight:600;white-space:nowrap;}
+.tbtn.book{background:var(--elevated);border-color:var(--accent-dim);color:var(--accent);}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);opacity:0;pointer-events:none;transition:.25s;z-index:200;}
+.overlay.show{opacity:1;pointer-events:auto;}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:201;background:var(--surface);border-top:1px solid var(--line);
+  border-radius:18px 18px 0 0;padding:16px 18px calc(28px + var(--safe-bot));max-height:84vh;overflow-y:auto;
+  transform:translateY(101%);transition:.28s cubic-bezier(.2,.8,.2,1);-webkit-overflow-scrolling:touch;}
+.sheet.show{transform:translateY(0);}
+.sheet .grip{width:42px;height:4px;border-radius:3px;background:var(--line);margin:2px auto 14px;}
+.sheet .close{position:absolute;top:14px;right:16px;width:32px;height:32px;border-radius:50%;border:1px solid var(--line);
+  background:var(--elevated);color:var(--text);font-size:17px;line-height:1;cursor:pointer;}
+.sheet h3{margin:2px 40px 2px 0;font-size:18px;font-weight:800;line-height:1.3;}
+.sheet .diff{color:var(--muted);font-size:12.5px;line-height:1.5;margin:6px 0 4px;}
+.sheet h4{font-size:11px;color:var(--accent);font-weight:700;letter-spacing:.6px;margin:16px 0 6px;}
+.sheet ol{margin:0;padding-left:20px;}
+.sheet ol li{font-size:13.5px;line-height:1.6;margin-bottom:6px;}
+.sheet .box{font-size:13px;line-height:1.55;background:var(--elevated);border-radius:10px;padding:10px 12px;}
+.sheet .box.warn{border-left:3px solid var(--test);}
+.sheet .box.aim{border-left:3px solid var(--accent);}
+.idxbtn{display:block;width:100%;text-align:left;background:var(--elevated);border:1px solid var(--line);
+  color:var(--text);font-family:inherit;font-size:14px;font-weight:700;padding:13px 14px;border-radius:11px;margin-bottom:8px;cursor:pointer;}
+.idxbtn small{display:block;color:var(--muted);font-weight:400;font-size:11.5px;margin-top:3px;}
 </style>
 </head>
 <body>
@@ -137,6 +163,7 @@ main{padding:8px 12px;}
 
 <div class="tools">
   <button class="tbtn go" onclick="jumpNext()">次の未完了へ</button>
+  <button class="tbtn book" onclick="openIndex()">📖 種目の説明</button>
   <button class="tbtn" onclick="exportData()">バックアップ書出</button>
   <button class="tbtn" onclick="document.getElementById('file').click()">復元</button>
   <button class="tbtn" onclick="resetAll()">リセット</button>
@@ -156,6 +183,9 @@ main{padding:8px 12px;}
   進捗は端末内に自動保存されます。機種変更や万一の消失に備え、時々「バックアップ書出」でファイルを保存してください。
 </div>
 <div class="toast" id="toast"></div>
+
+<div class="overlay" id="overlay" onclick="closeSheet()"></div>
+<div class="sheet" id="sheet"><div class="grip"></div><button class="close" onclick="closeSheet()">✕</button><div id="sheetbody"></div></div>
 
 <script>
 const C={acc:'var(--acc)',int:'var(--int)',del:'var(--del)',peak:'var(--peak)',test:'var(--test)'};
@@ -243,6 +273,71 @@ try{const r=localStorage.getItem(KEY); if(r)S=Object.assign(S,JSON.parse(r));}ca
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
 function fmt(w){return (Number.isInteger(w)?w:w).toString();}
 
+/* ===== 種目の説明 ===== */
+const EXPLAIN={
+ base:{t:"基本フォーム & 安全",diff:"全種目に共通。まずここを押さえる。",
+   how:["ベンチに寝て、目線がバーの真下にくる位置に","肩甲骨を寄せて下げる(胸を張る)。軽くアーチを作る","足は床をしっかり踏む(かかとを引く)","グリップは肩幅よりやや広め。親指は必ず握り込む(サムレス厳禁)","息を吸って腹圧 → みぞおち〜乳頭の間へコントロールして下ろす → 脚で床を押しながら肩の上へ押し切る"],
+   aim:"全バリエーションの土台になるフォーム。",
+   warn:"ラックのセーフティピンを必ず『胸の高さの少し下』にセット。潰れてもバーが止まります。1人の時・高重量・ポーズ系では必須。"},
+ comp:{t:"ベンチ(コンペ)",diff:"基本フォームそのまま。毎回まったく同じ動きで反復する。",
+   how:["みぞおち〜乳頭の間に下ろし、胸に軽く触れる","止めずに(または一定リズムで)肩の上へ押し切る","毎回同じフォーム・同じ軌道を意識する"],
+   aim:"本番フォームの固め・再現性。",warn:"フォームを毎回ブレさせないことが最優先。"},
+ narrow:{t:"ナロー(クローズグリップ)",diff:"手幅を狭め、肘を締めて腕(三頭筋)で押す。",
+   how:["手幅を肩幅くらいに(狭めすぎ厳禁)","肘を体側に近づけて、みぞおち寄りに下ろす","胸より腕の裏(三頭筋)で押す感覚で挙げる"],
+   aim:"三頭筋・ロックアウト(押し切り)の強化。",warn:"狭くしすぎると手首を痛める。肩肘が痛ければ少し広げる。"},
+ paused:{t:"ポーズベンチ(2秒静止)",diff:"胸で2秒止めてから押す(反動を使わない)。",
+   how:["胸に着けたら動きを止めて2秒キープ","止めている間も全身の張りは抜かない","2秒後に脚で押しながら挙げる"],
+   aim:"胸からゼロで押し出す力。あなたの弱点(ボトム)を直撃。",warn:"重量は通常より落ちて当然。バウンドさせない。"},
+ spoto:{t:"スポトプレス",diff:"胸に着けず、胸の手前で止める。",
+   how:["胸の2〜3cm手前まで下ろす","そこで1秒静止(バーは胸に触れない)","静止位置から押し上げる"],
+   aim:"一番詰まる局面そのものを鍛える。",warn:"止める高さを毎回一定に。最初は鏡や補助者で位置確認を。"},
+ feetup:{t:"足上げベンチ",diff:"足を床から離し、上半身だけで挙げる。",
+   how:["足をベンチに乗せる、または膝を曲げて宙に上げる","アーチ・脚の反動を使わず、大胸筋と体幹で挙げる","バランスを保ちながらゆっくり動作"],
+   aim:"脚に頼らない純粋な上半身の力。",warn:"バランスを崩しやすい→重量控えめ・セーフティ必須・腰を反りすぎない。"},
+ pin:{t:"ピンプレス(胸高ピン・デッドストップ) ★最重要",diff:"ピンに置いた静止状態から、ゼロ初速で押す。",
+   how:["ラックのピンを『胸に着く高さ』にセット","バーをピンに完全に置き、一瞬力を抜く","止まった状態から一気に押し上げる"],
+   aim:"ボトムの絶対筋力。あなたの最強の武器。",warn:"毎回しっかり降ろし切り、脱力してから押す。反動を使わない。"},
+ dynamic:{t:"ダイナミックベンチ(スピード)",diff:"軽い重量を、押すときだけ全力で速く。",
+   how:["軽い重量(50〜65%)を使う","下ろしは普通の速さで","押す瞬間だけ爆発的に・できる限り速く挙げる"],
+   aim:"胸からの初速(力の立ち上がり)を上げる。",warn:"重さでなく速度が目的。バーは握ったまま加速し放り投げない。セット間はしっかり休む。"},
+ warmup:{t:"ウォームアップ",diff:"本番前の準備セット。",
+   how:["軽い重量から段階的に上げる","フォーム確認と関節を温めるのが目的","疲れない範囲で(追い込まない)"],
+   aim:"本番の重量に体を慣らす。",warn:"ここで疲労を残さない。"},
+ rest:{t:"完全休養",diff:"トレーニングを休む日。",
+   how:["重い練習はしない","軽い有酸素やストレッチはOK"],
+   aim:"疲労を抜いて回復する(ピーキングの肝)。",warn:"『休む勇気』。ここで追い込むと本番に響く。"},
+};
+function infoKey(name){
+ if(name.includes('ナロー'))return 'narrow';
+ if(name.includes('スポト'))return 'spoto';
+ if(name.includes('足上げ'))return 'feetup';
+ if(name.includes('ピンプレス'))return 'pin';
+ if(name.includes('ダイナミック'))return 'dynamic';
+ if(name.includes('ポーズ'))return 'paused';
+ if(name.includes('W-up'))return 'warmup';
+ if(name.includes('休養')||name.includes('休'))return 'rest';
+ if(name.includes('ベンチ'))return 'comp';
+ return null;
+}
+function sheetShow(html){document.getElementById('sheetbody').innerHTML=html;
+ document.getElementById('overlay').classList.add('show');document.getElementById('sheet').classList.add('show');}
+function closeSheet(){document.getElementById('overlay').classList.remove('show');document.getElementById('sheet').classList.remove('show');}
+function openInfo(key){const e=EXPLAIN[key];if(!e)return;
+ let h=`<h3>${e.t}</h3><div class="diff">${e.diff}</div>`;
+ h+=`<h4>やり方</h4><ol>${e.how.map(s=>`<li>${s}</li>`).join('')}</ol>`;
+ h+=`<h4>狙い</h4><div class="box aim">${e.aim}</div>`;
+ h+=`<h4>注意</h4><div class="box warn">${e.warn}</div>`;
+ if(key!=='base'){h+=`<h4 style="margin-top:18px">共通</h4><button class="idxbtn" onclick="openInfo('base')">基本フォーム & 安全<small>全種目共通の構え・セーフティの置き方</small></button>`;}
+ sheetShow(h);}
+function openIndex(){
+ const order=[['base','まずこれ。共通の構え・セーフティ'],['comp','本番フォームの固め'],['narrow','三頭・押し切りの強化'],
+  ['paused','ボトムの力(弱点直撃)'],['spoto','詰まる局面を鍛える(弱点直撃)'],['feetup','脚に頼らない上半身'],
+  ['pin','ボトム絶対筋力(最重要の武器)'],['dynamic','胸からの初速・爆発力'],['warmup','本番前の準備'],['rest','回復日']];
+ let h=`<h3>種目の説明</h3><div class="diff">見たい種目をタップ。各週の種目名の「ⓘやり方」からも開けます。</div>`;
+ h+=order.map(([k,d])=>`<button class="idxbtn" onclick="openInfo('${k}')">${EXPLAIN[k].t}<small>${d}</small></button>`).join('');
+ sheetShow(h);}
+
+
 const app=document.getElementById('app');
 function render(){
   app.innerHTML='';
@@ -267,9 +362,11 @@ function render(){
         else{nums=`<div class="exnums">${fmt(w)}<span class="lt">kg × ${reps}回 × ${sets}set</span></div>`;}
         const rpebadge=rpe?`<span class="rpe">${rpe}</span>`:'';
         const actual=(kind===1)?`<div class="actual"><input type="text" placeholder="実測 (例: 92.5×5 楽だった)" value="${(S.actuals[id]||'').replace(/"/g,'&quot;')}" oninput="setAct('${id}',this.value)"></div>`:'';
+        const ik=infoKey(name);
+        const nameHtml=ik?`<div class="exname tappable" onclick="openInfo('${ik}')">${name}<span class="info">ⓘやり方</span></div>`:`<div class="exname">${name}</div>`;
         body+=`<div class="ex${ck?' done':''}${kind===0?' rest':''}" >`+
           `<div class="chk" onclick="toggle('${id}')"><svg viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg></div>`+
-          `<div class="exmain"><div class="exname">${name}</div>${nums}${actual}</div>${rpebadge}</div>`;
+          `<div class="exmain">${nameHtml}${nums}${actual}</div>${rpebadge}</div>`;
       });
       body+=`<div class="memo">${d.memo}</div></div>`;
     });
