@@ -11,13 +11,13 @@
 <title>BENCH 120 ｜ ピーキング</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700;800;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;600;700;800;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#0e0f12; --surface:#15171d; --elevated:#1c1f27; --line:#2a2e38;
-  --text:#eceef2; --muted:#9298a4; --faint:#5f6671;
-  --accent:#ff6a3d; --accent-dim:#7a3a26;
-  --acc:#4a86d6; --int:#e0913a; --del:#5fb85a; --peak:#b56fe0; --test:#ff5252;
+  --bg:#0a0a0b; --surface:#141414; --elevated:#1d1d1e; --line:#2c2c2e;
+  --text:#f4f3ef; --muted:#9b9b97; --faint:#5d5d5a;
+  --accent:#f7c21a; --accent-dim:#6e560f; --accent-ink:#1a1400;
+  --acc:#4a86d6; --int:#ee7b2b; --del:#5fb85a; --peak:#b56fe0; --test:#ff4d4d;
   --ok:#5fb85a;
   --safe-top:env(safe-area-inset-top); --safe-bot:env(safe-area-inset-bottom);
 }
@@ -30,20 +30,24 @@ body{padding-bottom:calc(28px + var(--safe-bot));}
 
 /* ---- Header ---- */
 header{position:sticky;top:0;z-index:50;
-  background:linear-gradient(180deg,#0e0f12 70%,rgba(14,15,18,.92));
-  padding:calc(12px + var(--safe-top)) 16px 12px;border-bottom:1px solid var(--line);
+  background:linear-gradient(180deg,#0a0a0b 72%,rgba(10,10,11,.92));
+  padding:calc(12px + var(--safe-top)) 16px 12px;border-bottom:2px solid var(--accent);
   backdrop-filter:blur(8px);}
-.hrow{display:flex;align-items:baseline;justify-content:space-between;gap:8px;}
-.logo{font-weight:900;font-size:21px;letter-spacing:.5px;line-height:1;}
-.logo b{color:var(--accent);}
-.goal{font-family:'DM Mono';font-size:12px;color:var(--muted);}
+.hrow{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.brand{display:flex;align-items:center;gap:11px;min-width:0;}
+.emblem{width:44px;height:44px;flex:none;border:2px solid var(--accent);border-radius:12px;
+  display:flex;align-items:center;justify-content:center;color:var(--accent);}
+.logo{font-family:'Anton',sans-serif;font-weight:400;font-size:26px;letter-spacing:1.2px;line-height:.92;text-transform:uppercase;}
+.logo b{color:var(--accent);font-weight:400;}
+.goal{font-family:'DM Mono';font-size:11px;color:var(--muted);margin-top:4px;letter-spacing:.4px;}
 .goal s{color:var(--accent);text-decoration:none;font-weight:500;}
+.ring{position:relative;width:52px;height:52px;flex:none;}
+.ring svg{transform:rotate(-90deg);}
+.ringpct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-family:'DM Mono';font-size:12px;font-weight:500;color:var(--text);}
 .savetag{font-size:10px;color:var(--faint);}
-.bar{height:7px;border-radius:6px;background:var(--elevated);margin-top:11px;overflow:hidden;}
-.bar>i{display:block;height:100%;width:0;border-radius:6px;
-  background:linear-gradient(90deg,var(--accent),#ffae3d);transition:width .4s ease;}
-.barmeta{display:flex;justify-content:space-between;margin-top:6px;font-size:11px;color:var(--muted);}
-.barmeta .pct{font-family:'DM Mono';color:var(--text);font-weight:500;}
+.barmeta{display:flex;justify-content:space-between;margin-top:10px;font-size:11px;color:var(--muted);}
+.barmeta .count{font-family:'DM Mono';color:var(--text);font-weight:500;}
 
 /* ---- Toolbar ---- */
 .tools{display:flex;gap:8px;padding:12px 16px 4px;flex-wrap:wrap;}
@@ -151,12 +155,31 @@ main{padding:8px 12px;}
 <body>
 <header>
   <div class="hrow">
-    <div class="logo">BENCH <b>120</b></div>
-    <div class="goal"><span id="dispmax">115</span>kg → <s>120kg</s></div>
+    <div class="brand">
+      <div class="emblem" aria-hidden="true">
+        <svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+          <line x1="6" y1="13" x2="20" y2="13"/>
+          <rect x="2.5" y="9" width="3.2" height="8" rx="1.2" fill="currentColor" stroke="none"/>
+          <rect x="20.3" y="9" width="3.2" height="8" rx="1.2" fill="currentColor" stroke="none"/>
+          <line x1="7.5" y1="10.5" x2="7.5" y2="15.5"/>
+          <line x1="18.5" y1="10.5" x2="18.5" y2="15.5"/>
+        </svg>
+      </div>
+      <div>
+        <div class="logo">BENCH <b>120</b></div>
+        <div class="goal"><span id="dispmax">115</span> → <s>120 KG</s></div>
+      </div>
+    </div>
+    <div class="ring">
+      <svg width="52" height="52" viewBox="0 0 52 52">
+        <circle cx="26" cy="26" r="21" fill="none" stroke="var(--elevated)" stroke-width="5"/>
+        <circle id="ringfill" cx="26" cy="26" r="21" fill="none" stroke="var(--accent)" stroke-width="5" stroke-linecap="round" stroke-dasharray="131.9" stroke-dashoffset="131.9" style="transition:stroke-dashoffset .45s ease"/>
+      </svg>
+      <span class="ringpct" id="pctlabel">0%</span>
+    </div>
   </div>
-  <div class="bar"><i id="barfill"></i></div>
   <div class="barmeta">
-    <span><span class="pct" id="pctlabel">0%</span> 完了</span>
+    <span><span class="count" id="countlabel">0/0</span> 完了</span>
     <span class="savetag" id="savetag">✓ 自動保存</span>
   </div>
 </header>
@@ -382,8 +405,10 @@ function updateBar(){
   let done=0,tot=0;
   PROGRAM.forEach((wk,wi)=>wk.days.forEach((d,di)=>d.lifts.forEach((l,li)=>{tot++; if(S.checks[`${wi}_${di}_${li}`])done++;})));
   const p=tot?Math.round(done/tot*100):0;
-  document.getElementById('barfill').style.width=p+'%';
+  const C=131.9, off=C*(1-p/100);
+  const rf=document.getElementById('ringfill'); if(rf)rf.style.strokeDashoffset=off.toFixed(1);
   document.getElementById('pctlabel').textContent=p+'%';
+  const cl=document.getElementById('countlabel'); if(cl)cl.textContent=done+'/'+tot;
 }
 function flash(){const t=document.getElementById('savetag'); t.textContent='✓ 保存しました'; t.style.color='var(--ok)';
   clearTimeout(window._ft); window._ft=setTimeout(()=>{t.textContent='✓ 自動保存';t.style.color='';},1200);}
