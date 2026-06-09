@@ -113,6 +113,14 @@ main{padding:8px 12px;}
 .actual input{width:100%;background:var(--bg);border:1px solid var(--line);color:var(--text);
   font-family:'DM Mono';font-size:12px;border-radius:8px;padding:6px 9px;}
 .actual input::placeholder{color:var(--faint);}
+.actual select{width:100%;background:var(--bg);border:1px solid var(--line);color:var(--text);
+  font-family:'Archivo',sans-serif;font-size:12.5px;border-radius:8px;padding:8px 9px;}
+.reco{font-size:11.5px;margin-top:6px;border-radius:8px;padding:7px 9px;line-height:1.45;}
+.reco.ok{color:var(--ok);background:rgba(95,184,90,.10);}
+.reco.up{color:var(--accent);background:rgba(247,194,26,.12);}
+.reco.down{color:var(--test);background:rgba(255,77,77,.12);}
+.suggest{display:inline-block;margin-left:8px;font-size:10.5px;color:var(--accent);
+  border:1px dashed var(--accent-dim);border-radius:6px;padding:1px 6px;font-family:'Archivo',sans-serif;}
 .memo{font-size:11.5px;color:var(--faint);line-height:1.5;margin-top:11px;
   padding-left:11px;border-left:2px solid var(--line);}
 .rest .exnums{display:none;}
@@ -362,6 +370,27 @@ function openIndex(){
 
 
 const app=document.getElementById('app');
+function deltaFromFeel(feelVal,tRPE){
+  if(!feelVal||isNaN(tRPE))return null;
+  const felt={1:5,2:6.5,3:8,4:9,5:10}[feelVal];
+  const diff=felt-tRPE;
+  if(diff<=-1.5)return 2.5;
+  if(diff<=0.5)return 0;
+  if(diff<=1.5)return -2.5;
+  return -5;
+}
+function priorDelta(wi,di,li){
+  const key=infoKey(PROGRAM[wi].days[di].lifts[li][0]); if(!key)return 0;
+  const curPos=wi*1000+di*100+li; let best=-1,bd=0;
+  PROGRAM.forEach((wk,wj)=>wk.days.forEach((d,dj)=>d.lifts.forEach((l,lj)=>{
+    if(l[5]!==1||infoKey(l[0])!==key)return;
+    const pos=wj*1000+dj*100+lj; if(pos>=curPos)return;
+    const fv=S.actuals[`${wj}_${dj}_${lj}`]; if(!fv)return;
+    const d=deltaFromFeel(fv,parseFloat(String(l[4]||'').replace('RPE',''))); if(d===null)return;
+    if(pos>best){best=pos;bd=d;}
+  })));
+  return best>=0?bd:0;
+}
 function render(){
   app.innerHTML='';
   PROGRAM.forEach((wk,wi)=>{
@@ -383,8 +412,20 @@ function render(){
         else if(kind===3){nums=`<div class="exnums warm">${fmt(w)}<span class="lt">kg ×${reps}</span></div>`;}
         else if(kind===2){nums=`<div class="exnums speed">${fmt(w)}<span class="lt">kg × ${reps}回 × ${sets}set</span></div>`;}
         else{nums=`<div class="exnums">${fmt(w)}<span class="lt">kg × ${reps}回 × ${sets}set</span></div>`;}
+        if(kind===1){const sg=priorDelta(wi,di,li); if(sg!==0){nums=nums.replace('</div>',`<span class="suggest">推奨 ${fmt(w+sg)}kg</span></div>`);}}
         const rpebadge=rpe?`<span class="rpe">${rpe}</span>`:'';
-        const actual=(kind===1)?`<div class="actual"><input type="text" placeholder="実測 (例: 92.5×5 楽だった)" value="${(S.actuals[id]||'').replace(/"/g,'&quot;')}" oninput="setAct('${id}',this.value)"></div>`:'';
+        let actual='';
+        if(kind===1){
+          const sel=S.actuals[id]||'';
+          const FEEL=[['','— 実測を記録 —'],['1','楽だった（あと5回以上）'],['2','やや余裕（あと3〜4回）'],['3','ちょうど（あと2回）'],['4','きつい（あと1回）'],['5','限界（もう上がらない）']];
+          const opts=FEEL.map(([v,t])=>`<option value="${v}"${v===sel?' selected':''}>${t}</option>`).join('');
+          let reco='';
+          if(sel){const tR=parseFloat(String(rpe||'').replace('RPE','')); const d=deltaFromFeel(sel,tR);
+            if(d!==null){ if(d>0)reco=`<div class="reco up">▲ 軽め → 次回 +${d}kg を検討</div>`;
+              else if(d<0)reco=`<div class="reco down">▼ ${d<=-5?'重すぎ':'やや重い'} → 次回 ${d}kg・無理は禁物</div>`;
+              else reco=`<div class="reco ok">✓ 狙い通り（RPE${tR}）→ 重量維持でOK</div>`; }}
+          actual=`<div class="actual"><select onchange="setAct('${id}',this.value)">${opts}</select>${reco}</div>`;
+        }
         const ik=infoKey(name);
         const nameHtml=ik?`<div class="exname tappable" onclick="openInfo('${ik}')">${name}<span class="info">ⓘやり方</span></div>`:`<div class="exname">${name}</div>`;
         body+=`<div class="ex${ck?' done':''}${kind===0?' rest':''}" >`+
@@ -414,7 +455,7 @@ function flash(){const t=document.getElementById('savetag'); t.textContent='✓ 
   clearTimeout(window._ft); window._ft=setTimeout(()=>{t.textContent='✓ 自動保存';t.style.color='';},1200);}
 function toggle(id){S.checks[id]=!S.checks[id]; if(!S.checks[id])delete S.checks[id]; save(); flash(); render();}
 function setDate(k,v){if(v)S.dates[k]=v;else delete S.dates[k]; save(); flash();}
-function setAct(id,v){if(v)S.actuals[id]=v;else delete S.actuals[id]; save();}
+function setAct(id,v){if(v)S.actuals[id]=v;else delete S.actuals[id]; save(); flash(); render();}
 function toggleWk(wi){S.open=(S.open===wi?-1:wi); save(); render();
   if(S.open===wi){const el=app.children[wi]; setTimeout(()=>el.scrollIntoView({behavior:'smooth',block:'start'}),60);}}
 function jumpNext(){
@@ -424,11 +465,21 @@ function jumpNext(){
   toast('全メニュー完了！お疲れさまでした');
 }
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1900);}
-function exportData(){
-  const blob=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
-  a.download='bench120_backup_'+new Date().toISOString().slice(0,10)+'.json';
-  document.body.appendChild(a);a.click();a.remove();toast('バックアップを書き出しました');
+async function exportData(){
+  const data=JSON.stringify(S,null,2);
+  const fname='bench120_backup_'+new Date().toISOString().slice(0,10)+'.json';
+  try{
+    const file=new File([data],fname,{type:'application/json'});
+    if(navigator.canShare&&navigator.canShare({files:[file]})){
+      await navigator.share({files:[file],title:'BENCH120 バックアップ'});
+      toast('共有先に保存しました'); return;
+    }
+  }catch(e){ if(e&&e.name==='AbortError')return; }
+  try{
+    const blob=new Blob([data],{type:'application/json'});
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=fname;
+    document.body.appendChild(a);a.click();a.remove();toast('ファイルに書き出しました');
+  }catch(e){toast('書き出しに失敗しました');}
 }
 function importData(inp){const f=inp.files[0];if(!f)return;const r=new FileReader();
   r.onload=e=>{try{const d=JSON.parse(e.target.result);S=Object.assign({dates:{},checks:{},actuals:{},open:0},d);save();render();toast('復元しました');}catch(err){toast('読み込み失敗');}};
