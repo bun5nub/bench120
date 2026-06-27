@@ -70,6 +70,31 @@ header{position:sticky;top:0;z-index:50;
 .feasib.ok{color:var(--ok);background:rgba(95,184,90,.10);}
 .feasib.warn{color:var(--int);background:rgba(238,123,43,.12);}
 .feasib.bad{color:var(--test);background:rgba(255,77,77,.12);}
+.moderow{display:flex;gap:6px;margin-bottom:11px;}
+.modebtn{flex:1;background:var(--bg);border:1px solid var(--line);color:var(--muted);
+  font-family:inherit;font-size:11.5px;font-weight:700;padding:8px 4px;border-radius:9px;cursor:pointer;}
+.modebtn.on{background:var(--elevated);border-color:var(--accent-dim);color:var(--accent);}
+.freqrow{display:flex;align-items:center;gap:8px;margin-top:10px;}
+.freqrow span{font-size:11px;color:var(--muted);}
+.freqseg{display:flex;gap:4px;}
+.freqseg button{background:var(--bg);border:1px solid var(--line);color:var(--muted);
+  font-family:'DM Mono';font-size:12px;width:34px;padding:6px 0;border-radius:8px;cursor:pointer;}
+.freqseg button.on{background:var(--accent);border-color:var(--accent);color:#170a05;font-weight:700;}
+.arbanner{display:flex;align-items:center;gap:8px;font-size:11.5px;line-height:1.45;margin-top:10px;
+  border-radius:9px;padding:8px 10px;color:var(--peak);background:rgba(181,111,224,.12);}
+.arbanner button{margin-left:auto;flex:none;background:transparent;border:1px solid var(--peak);
+  color:var(--peak);font-size:10.5px;font-weight:700;padding:3px 8px;border-radius:7px;cursor:pointer;}
+.sched{background:var(--surface);border:1px solid var(--line);border-radius:14px;margin:12px 12px 0;padding:12px 14px;}
+.sched .lbl{font-size:11px;color:var(--accent);font-weight:700;letter-spacing:.5px;margin-bottom:9px;text-transform:uppercase;}
+.schedgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;}
+.schedgrid .d{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:7px 2px;text-align:center;min-height:54px;}
+.schedgrid .d .dn{font-size:10px;color:var(--faint);margin-bottom:4px;}
+.schedgrid .d .pill{display:block;font-size:10px;font-weight:700;border-radius:5px;padding:2px 0;margin:2px 1px;color:#0a0a0b;}
+.schedgrid .d .rest{font-size:10px;color:var(--faint);margin-top:8px;}
+.schedwarn{font-size:11.5px;line-height:1.5;margin-top:10px;border-radius:9px;padding:8px 10px;}
+.schedwarn.ok{color:var(--ok);background:rgba(95,184,90,.10);}
+.schedwarn.warn{color:var(--int);background:rgba(238,123,43,.12);}
+.schedwarn.bad{color:var(--test);background:rgba(255,77,77,.12);}
 
 /* ---- Toolbar ---- */
 .tools{display:flex;gap:8px;padding:12px 16px 4px;flex-wrap:wrap;}
@@ -215,6 +240,10 @@ main{padding:8px 12px;}
 </header>
 
 <div class="setup">
+  <div class="moderow">
+    <button class="modebtn" id="mode-focus" onclick="setMode('focus')">1種目に集中</button>
+    <button class="modebtn" id="mode-concurrent" onclick="setMode('concurrent')">BIG3を並行</button>
+  </div>
   <div class="lbl" id="setuplbl">ベンチプレス｜目標設定</div>
   <div class="inrow">
     <label class="infield"><span>現在の最大 <i class="u">1RM kg</i></span>
@@ -222,7 +251,14 @@ main{padding:8px 12px;}
     <label class="infield"><span>目標 <i class="u">kg</i></span>
       <input class="numin tgt" id="tgtin" type="number" inputmode="decimal" step="2.5" onchange="setCfg('tgt',this.value)"></label>
   </div>
+  <div class="freqrow"><span>週の頻度</span><div class="freqseg" id="freqseg"></div></div>
   <div class="feasib" id="feasib"></div>
+  <div id="arbanner"></div>
+</div>
+<div class="sched" id="sched" style="display:none">
+  <div class="lbl">推奨 週スケジュール</div>
+  <div class="schedgrid" id="schedgrid"></div>
+  <div class="schedwarn" id="schedwarn"></div>
 </div>
 
 <div class="tools">
@@ -340,15 +376,15 @@ const TPL=[
 /* ===== リフト定義(種目名・補助・説明) ===== */
 const LIFTS=["bench","squat","deadlift"];
 const LIFTMETA={
- bench:{jp:"ベンチプレス",short:"BENCH",cur:115,tgt:120,
+ bench:{jp:"ベンチプレス",short:"BENCH",cur:115,tgt:120,freq:3,
    names:{comp:"ベンチ(コンペ)",narrow:"ナロー(クローズグリップ)",spoto:"スポトプレス",feetup:"足上げベンチ",pin:"ピンプレス(胸高・デッドストップ)",dynamic:"ダイナミックベンチ",warmup:"ウォームアップ",rest:"完全休養"},
    acc:{vol:"補助: バーベルローイング4×8 / ライイングトライセップEXT3×10",bottom:"補助: 懸垂 or ローイング4×8 / OHP3×6",speed:"初速が目的。胸から全力で押し離す。重さでなく速度で管理。",deload:"動きの確認のみ。余裕を残して終える。",intensity:"補助: ローイング4×6 / ライイングEXT3×8",peak:"補助は最小限(ローイング2×8のみ)。追い込まない。",test:"opener(約90%)は確実に挙がる重量。本命成功で余裕あれば+2.5kgも可。"},
  },
- squat:{jp:"スクワット",short:"SQUAT",cur:130,tgt:160,
+ squat:{jp:"スクワット",short:"SQUAT",cur:140,tgt:150,freq:2,
    names:{comp:"スクワット(コンペ)",narrow:"フロントスクワット",spoto:"ポーズスクワット(ボトム1秒)",feetup:"テンポスクワット(3秒下ろし)",pin:"ボックス/ピンスクワット(デッドストップ)",dynamic:"ダイナミックスクワット",warmup:"ウォームアップ",rest:"完全休養"},
    acc:{vol:"補助: ルーマニアンDL4×8 / レッグカール3×12",bottom:"補助: ブルガリアンSQ3×8 / レッグエクステンション3×12",speed:"初速が目的。立ち上がりを爆発的に。重さでなく速度で管理。",deload:"動きの確認のみ。余裕を残して終える。",intensity:"補助: ルーマニアンDL4×6 / レッグカール3×10",peak:"補助は最小限。フォーム維持のみ。",test:"opener(約90%)は確実に挙がる重量。本命成功で余裕あれば+2.5kgも可。"},
  },
- deadlift:{jp:"デッドリフト",short:"DEAD",cur:160,tgt:200,
+ deadlift:{jp:"デッドリフト",short:"DEAD",cur:180,tgt:195,freq:1,
    names:{comp:"デッドリフト(コンペ)",narrow:"ブロック/ラックプル(ロックアウト)",spoto:"デフィシットデッド(初動強化)",feetup:"ポーズデッド(膝下1秒静止)",pin:"デッドストップ・デッド(毎回床で静止)",dynamic:"スピードデッドリフト",warmup:"ウォームアップ",rest:"完全休養"},
    acc:{vol:"補助: 懸垂4×8 / ヒップスラスト3×10",bottom:"補助: ベントオーバーロー4×8 / バックエクステンション3×12",speed:"初速が目的。床から爆発的に引く。重さでなく速度で管理。",deload:"動きの確認のみ。余裕を残して終える。",intensity:"補助: ペンドレイロー4×6 / グッドモーニング3×8",peak:"補助は最小限。神経系の準備のみ。",test:"opener(約90%)は確実に挙がる重量。本命成功で余裕あれば+2.5kgも可。引き過ぎ注意。"},
  },
@@ -437,18 +473,35 @@ function getExplain(role){if(role==="warmup")return WARMUP_EX;if(role==="rest")r
 
 /* ===== State ===== */
 const KEY="big3_v1";
-let S={lift:"bench",cfg:{},dates:{},checks:{},actuals:{},open:0};
-LIFTS.forEach(k=>{S.cfg[k]={cur:LIFTMETA[k].cur,tgt:LIFTMETA[k].tgt};});
+function defCfg(k){return {cur:LIFTMETA[k].cur,tgt:LIFTMETA[k].tgt,freq:LIFTMETA[k].freq,tmFactor:1,lastLog:-1};}
+let S={mode:"concurrent",lift:"bench",cfg:{},dates:{},checks:{},actuals:{},open:0};
+LIFTS.forEach(k=>{S.cfg[k]=defCfg(k);});
 try{const r=localStorage.getItem(KEY); if(r){const p=JSON.parse(r);
   S=Object.assign(S,p);
-  LIFTS.forEach(k=>{if(!S.cfg[k])S.cfg[k]={cur:LIFTMETA[k].cur,tgt:LIFTMETA[k].tgt};});}}catch(e){}
+  LIFTS.forEach(k=>{S.cfg[k]=Object.assign(defCfg(k),S.cfg[k]||{});});}}catch(e){}
 
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
 function cfg(){return S.cfg[S.lift];}
 function fmt(w){const r=Math.round(w*100)/100; return (Number.isInteger(r)?r:r).toString();}
 function round125(x){return Math.round(x/1.25)*1.25;}
 function refMax(wi){const c=cfg();return c.cur+(c.tgt-c.cur)*PROG[wi];}
-function weightOf(wi,pct){return round125(refMax(wi)*pct);}
+function weightOf(wi,pct){const c=cfg();const f=wi>c.lastLog?c.tmFactor:1;return round125(refMax(wi)*pct*f);}
+/* 並行モードで実施する曜日を頻度から決める(テスト週は常に全日) */
+function activeDays(wk){if(wk.days.length<=1)return wk.days.map((d,di)=>({d,di}));
+  return wk.days.map((d,di)=>({d,di})).filter(x=>x.di<cfg().freq);}
+/* 実測→推定1RM→以降の週を調整(平滑化+上限) */
+function updateTM(wi,di,li,sel){
+  const l=TPL[wi].days[di].lifts[li]; if(l[5]!==1||!sel)return;
+  const tR=parseFloat(String(l[4]||'').replace('RPE','')); if(isNaN(tR)||tR<7)return; // 軽い/デロード週は学習しない
+  const felt={1:5,2:6.5,3:8,4:9,5:10}[sel]; const reps=l[2];
+  // 同負荷なので比は『感じたRIR vs 目標RIR』のみで決まる(loadは相殺)
+  const ratio=(1+(reps+(10-felt))/30)/(1+(reps+(10-tR))/30);
+  const c=cfg();
+  let nf=c.tmFactor*(0.5+0.5*ratio);
+  nf=Math.max(0.93,Math.min(1.07,nf));
+  c.tmFactor=Math.round(nf*1000)/1000;
+  c.lastLog=Math.max(c.lastLog,wi);
+}
 
 /* ===== Sheets ===== */
 function sheetShow(html){document.getElementById('sheetbody').innerHTML=html;
@@ -504,17 +557,20 @@ function render(){
   document.getElementById('setuplbl').textContent=m.jp+'｜目標設定';
   document.getElementById('curin').value=c.cur;
   document.getElementById('tgtin').value=c.tgt;
-  renderTabs(); renderFeasib();
+  document.getElementById('mode-focus').classList.toggle('on',S.mode==='focus');
+  document.getElementById('mode-concurrent').classList.toggle('on',S.mode==='concurrent');
+  renderTabs(); renderFreq(); renderFeasib(); renderAR(); renderSched();
 
   app.innerHTML='';
   TPL.forEach((wk,wi)=>{
-    const ids=[]; wk.days.forEach((d,di)=>d.lifts.forEach((l,li)=>{if(l[0]!=='rest')ids.push(`${S.lift}_${wi}_${di}_${li}`);}));
+    const days=activeDays(wk);
+    const ids=[]; days.forEach(({d,di})=>d.lifts.forEach((l,li)=>{if(l[0]!=='rest')ids.push(`${S.lift}_${wi}_${di}_${li}`);}));
     const done=ids.filter(id=>S.checks[id]).length, tot=ids.length, all=done===tot&&tot>0;
     const card=document.createElement('div');
     card.className='wk'+(S.open===wi?' open':'')+(all?' alldone':'');
     card.style.setProperty('--phase',wk.c);
     let body=`<div class="intro">${wk.intro}</div>`;
-    wk.days.forEach((d,di)=>{
+    days.forEach(({d,di})=>{
       const dkey=`${S.lift}_${wi}_${di}`;
       body+=`<div class="day"><div class="dayhead"><span class="dayname">${d.n}</span>`+
         `<input class="dateinp" type="date" value="${S.dates[dkey]||''}" onchange="setDate('${dkey}',this.value)"></div>`;
@@ -539,9 +595,10 @@ function render(){
           const opts=FEEL.map(([v,t])=>`<option value="${v}"${v===sel?' selected':''}>${t}</option>`).join('');
           let reco='';
           if(sel){const tR=parseFloat(String(rpe||'').replace('RPE','')); const dd=deltaFromFeel(sel,tR);
-            if(dd!==null){ if(dd>0)reco=`<div class="reco up">▲ 軽め → 次回 +${dd}kg を検討</div>`;
-              else if(dd<0)reco=`<div class="reco down">▼ ${dd<=-5?'重すぎ':'やや重い'} → 次回 ${dd}kg・無理は禁物</div>`;
-              else reco=`<div class="reco ok">✓ 狙い通り（RPE${tR}）→ 重量維持でOK</div>`; }}
+            const tail=(tR>=7)?'（以降の週へ自動反映）':'';
+            if(dd!==null){ if(dd>0)reco=`<div class="reco up">▲ 軽め → 強度を上げます${tail}</div>`;
+              else if(dd<0)reco=`<div class="reco down">▼ ${dd<=-5?'重すぎ':'やや重い'} → 強度を下げます・無理は禁物${tail}</div>`;
+              else reco=`<div class="reco ok">✓ 狙い通り（RPE${tR}）→ 現状維持でOK</div>`; }}
           actual=`<div class="actual"><select onchange="setAct('${id}',this.value)">${opts}</select>${reco}</div>`;
         }
         const tappable=(role!=='rest');
@@ -579,9 +636,43 @@ function renderFeasib(){
   el.className='feasib '+cls;
   el.innerHTML=`+${fmt(gain)}kg（+${pct.toFixed(1)}%／約${fmt(Math.round(perMonth*10)/10)}kg/月）<br>${msg}`;
 }
+function renderFreq(){
+  const c=cfg();const seg=document.getElementById('freqseg');
+  seg.innerHTML=[1,2,3].map(n=>`<button class="${c.freq===n?'on':''}" onclick="setFreq(${n})">${n}</button>`).join('')+`<span style="margin-left:6px">回/週</span>`;
+}
+function renderAR(){
+  const c=cfg(),el=document.getElementById('arbanner');
+  if(c.tmFactor===1){el.innerHTML='';return;}
+  const p=((c.tmFactor-1)*100); const sign=p>0?'+':'';
+  const proj=round125(c.tgt*c.tmFactor);
+  el.innerHTML=`<div class="arbanner">📈 実測を反映中：以降の週を ${sign}${p.toFixed(1)}% 調整（推定到達 ≈ ${fmt(proj)}kg）<button onclick="resetAR()">解除</button></div>`;
+}
+function renderSched(){
+  const el=document.getElementById('sched');
+  if(S.mode!=='concurrent'){el.style.display='none';return;}
+  el.style.display='block';
+  // 種目をラウンドロビンで均等配置(SQとDLが連続しにくい)
+  const order=['squat','bench','deadlift'];
+  const colJ={squat:'var(--del)',bench:'var(--accent)',deadlift:'var(--acc)'};
+  let n=0; const buckets={}; order.forEach(k=>{buckets[k]=S.cfg[k].freq;n+=S.cfg[k].freq;});
+  let rr=[]; while(rr.length<n){order.forEach(k=>{if(buckets[k]>0){rr.push(k);buckets[k]--;}});}
+  const days=['月','火','水','木','金','土','日'];
+  const plan=days.map(()=>[]);
+  rr.forEach((k,i)=>{plan[Math.round(i*7/Math.max(n,1))%7].push(k);});
+  document.getElementById('schedgrid').innerHTML=days.map((dn,i)=>{
+    const cells=plan[i].map(k=>`<span class="pill" style="background:${colJ[k]}">${LIFTMETA[k].short}</span>`).join('');
+    return `<div class="d"><div class="dn">${dn}</div>${cells||'<div class="rest">休</div>'}</div>`;
+  }).join('');
+  const w=document.getElementById('schedwarn');
+  let cls,msg;
+  if(n<=4){cls='ok';msg=`週${n}セッション。回復に余裕があり継続しやすい配分です。`;}
+  else if(n<=6){cls='warn';msg=`週${n}セッション。標準〜やや多め。睡眠・栄養を確保し、腰の疲労が抜けなければ頻度を下げて。`;}
+  else{cls='bad';msg=`週${n}セッションは多すぎる傾向。特にデッドの頻度を1回に下げ、スクワットと連日にしないことを推奨します。`;}
+  w.className='schedwarn '+cls; w.textContent=msg;
+}
 function updateBar(){
   let done=0,tot=0;
-  TPL.forEach((wk,wi)=>wk.days.forEach((d,di)=>d.lifts.forEach((l,li)=>{if(l[0]==='rest')return;tot++; if(S.checks[`${S.lift}_${wi}_${di}_${li}`])done++;})));
+  TPL.forEach((wk,wi)=>activeDays(wk).forEach(({d,di})=>d.lifts.forEach((l,li)=>{if(l[0]==='rest')return;tot++; if(S.checks[`${S.lift}_${wi}_${di}_${li}`])done++;})));
   const p=tot?Math.round(done/tot*100):0;
   const CC=131.9, off=CC*(1-p/100);
   const rf=document.getElementById('ringfill'); if(rf)rf.style.strokeDashoffset=off.toFixed(1);
@@ -593,15 +684,20 @@ function flash(){const t=document.getElementById('savetag'); t.textContent='✓ 
 
 /* ===== Actions ===== */
 function switchLift(k){if(S.lift===k)return; S.lift=k; S.open=0; save(); render(); window.scrollTo({top:0,behavior:'smooth'});}
+function setMode(m){S.mode=m; save(); render();}
+function setFreq(n){cfg().freq=n; save(); flash(); render();}
+function resetAR(){const c=cfg();c.tmFactor=1;c.lastLog=-1; save(); render(); toast('実測の自動調整を解除しました');}
 function setCfg(field,v){const n=parseFloat(v); if(!isNaN(n)&&n>0)cfg()[field]=n; save(); flash(); render();}
 function toggle(id){S.checks[id]=!S.checks[id]; if(!S.checks[id])delete S.checks[id]; save(); flash(); render();}
 function setDate(k,v){if(v)S.dates[k]=v;else delete S.dates[k]; save(); flash();}
-function setAct(id,v){if(v)S.actuals[id]=v;else delete S.actuals[id]; save(); flash(); render();}
+function setAct(id,v){if(v)S.actuals[id]=v;else delete S.actuals[id];
+  const m=id.match(/_(\d+)_(\d+)_(\d+)$/); if(m)updateTM(+m[1],+m[2],+m[3],v);
+  save(); flash(); render();}
 function toggleWk(wi){S.open=(S.open===wi?-1:wi); save(); render();
   if(S.open===wi){const el=app.children[wi]; setTimeout(()=>el.scrollIntoView({behavior:'smooth',block:'start'}),60);}}
 function jumpNext(){
   for(let wi=0;wi<TPL.length;wi++){const wk=TPL[wi];let inc=false;
-    wk.days.forEach((d,di)=>d.lifts.forEach((l,li)=>{if(l[0]==='rest')return;if(!S.checks[`${S.lift}_${wi}_${di}_${li}`])inc=true;}));
+    activeDays(wk).forEach(({d,di})=>d.lifts.forEach((l,li)=>{if(l[0]==='rest')return;if(!S.checks[`${S.lift}_${wi}_${di}_${li}`])inc=true;}));
     if(inc){S.open=wi;save();render();const el=app.children[wi];setTimeout(()=>el.scrollIntoView({behavior:'smooth',block:'start'}),60);return;}}
   toast(LIFTMETA[S.lift].jp+'の全メニュー完了！お疲れさまでした');
 }
@@ -624,13 +720,14 @@ async function exportData(){
 }
 function importData(inp){const f=inp.files[0];if(!f)return;const r=new FileReader();
   r.onload=e=>{try{const d=JSON.parse(e.target.result);
-    S=Object.assign({lift:"bench",cfg:{},dates:{},checks:{},actuals:{},open:0},d);
-    LIFTS.forEach(k=>{if(!S.cfg[k])S.cfg[k]={cur:LIFTMETA[k].cur,tgt:LIFTMETA[k].tgt};});
+    S=Object.assign({mode:"concurrent",lift:"bench",cfg:{},dates:{},checks:{},actuals:{},open:0},d);
+    LIFTS.forEach(k=>{S.cfg[k]=Object.assign(defCfg(k),S.cfg[k]||{});});
     save();render();toast('復元しました');}catch(err){toast('読み込み失敗');}};
   r.readAsText(f);inp.value='';}
-function resetAll(){if(confirm('現在の種目('+LIFTMETA[S.lift].jp+')の日付・チェック・実測を消去します。よろしいですか？\n※目標設定と他種目は残ります')){
+function resetAll(){if(confirm('現在の種目('+LIFTMETA[S.lift].jp+')の日付・チェック・実測・自動調整を消去します。よろしいですか？\n※目標設定と他種目は残ります')){
   const pre=S.lift+'_';
   [['checks'],['dates'],['actuals']].forEach(([k])=>{Object.keys(S[k]).forEach(id=>{if(id.indexOf(pre)===0)delete S[k][id];});});
+  cfg().tmFactor=1; cfg().lastLog=-1;
   save();render();toast('リセットしました');}}
 render();
 </script>
