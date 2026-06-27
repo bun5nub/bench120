@@ -95,6 +95,20 @@ header{position:sticky;top:0;z-index:50;
 .schedwarn.ok{color:var(--ok);background:rgba(95,184,90,.10);}
 .schedwarn.warn{color:var(--int);background:rgba(238,123,43,.12);}
 .schedwarn.bad{color:var(--test);background:rgba(255,77,77,.12);}
+.today{background:linear-gradient(135deg,#1a1709,var(--surface));border:1px solid var(--accent-dim);
+  border-radius:14px;margin:12px 12px 0;padding:13px 14px;cursor:pointer;}
+.today:active{background:var(--elevated);}
+.today .thead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;}
+.today .tt{font-size:11px;color:var(--accent);font-weight:800;letter-spacing:.6px;text-transform:uppercase;}
+.today .tgo{font-size:11px;color:var(--accent);border:1px solid var(--accent-dim);border-radius:7px;padding:3px 9px;white-space:nowrap;}
+.today .tsub{font-size:13px;font-weight:700;line-height:1.3;}
+.today .tph{font-size:10.5px;color:var(--muted);margin-top:2px;}
+.today .titem{display:flex;justify-content:space-between;gap:10px;font-size:12.5px;margin-top:7px;
+  padding-top:7px;border-top:1px solid var(--line);}
+.today .titem .nm{color:var(--text);min-width:0;}
+.today .titem .wt{font-family:'DM Mono';color:var(--accent);white-space:nowrap;}
+.today .titem.dn .nm{color:var(--faint);text-decoration:line-through;}
+.today .tnone{font-size:12.5px;color:var(--del);font-weight:700;}
 
 /* ---- Toolbar ---- */
 .tools{display:flex;gap:8px;padding:12px 16px 4px;flex-wrap:wrap;}
@@ -260,6 +274,7 @@ main{padding:8px 12px;}
   <div class="schedgrid" id="schedgrid"></div>
   <div class="schedwarn" id="schedwarn"></div>
 </div>
+<div class="today" id="today" style="display:none"></div>
 
 <div class="tools">
   <button class="tbtn go" onclick="jumpNext()">次の未完了へ</button>
@@ -473,12 +488,31 @@ function getExplain(role){if(role==="warmup")return WARMUP_EX;if(role==="rest")r
 
 /* ===== State ===== */
 const KEY="big3_v1";
+const MINW=20, MAXW=500;
 function defCfg(k){return {cur:LIFTMETA[k].cur,tgt:LIFTMETA[k].tgt,freq:LIFTMETA[k].freq,tmFactor:1,lastLog:-1};}
-let S={mode:"concurrent",lift:"bench",cfg:{},dates:{},checks:{},actuals:{},open:0};
-LIFTS.forEach(k=>{S.cfg[k]=defCfg(k);});
-try{const r=localStorage.getItem(KEY); if(r){const p=JSON.parse(r);
-  S=Object.assign(S,p);
-  LIFTS.forEach(k=>{S.cfg[k]=Object.assign(defCfg(k),S.cfg[k]||{});});}}catch(e){}
+function freshState(){const s={version:2,mode:"concurrent",lift:"bench",cfg:{},dates:{},checks:{},actuals:{},adjustments:[],open:0};LIFTS.forEach(k=>{s.cfg[k]=defCfg(k);});return s;}
+function clampN(v,min,max,def){const n=parseFloat(v);return (isNaN(n)||n<min||n>max)?def:n;}
+/* 任意のオブジェクトを安全な形のStateへ正規化(不正値は既定へ) */
+function sanitize(raw){
+  const s=freshState(); if(!raw||typeof raw!=='object')return s;
+  s.mode=(raw.mode==='focus'||raw.mode==='concurrent')?raw.mode:'concurrent';
+  s.lift=LIFTS.includes(raw.lift)?raw.lift:'bench';
+  s.open=Number.isInteger(raw.open)?raw.open:0;
+  const isObj=o=>o&&typeof o==='object'&&!Array.isArray(o);
+  if(isObj(raw.dates))s.dates=raw.dates;
+  if(isObj(raw.checks))s.checks=raw.checks;
+  if(isObj(raw.actuals))s.actuals=raw.actuals;
+  if(Array.isArray(raw.adjustments))s.adjustments=raw.adjustments;
+  if(isObj(raw.cfg))LIFTS.forEach(k=>{const c=raw.cfg[k]; if(!isObj(c))return; const d=s.cfg[k];
+    d.cur=clampN(c.cur,MINW,MAXW,d.cur);
+    d.tgt=clampN(c.tgt,MINW,MAXW,d.tgt);
+    d.freq=[1,2,3].includes(c.freq)?c.freq:d.freq;
+    d.tmFactor=clampN(c.tmFactor,0.93,1.07,1);
+    d.lastLog=Number.isInteger(c.lastLog)?c.lastLog:-1;});
+  return s;
+}
+let S;
+try{const r=localStorage.getItem(KEY); S=r?sanitize(JSON.parse(r)):freshState();}catch(e){S=freshState();}
 
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
 function cfg(){return S.cfg[S.lift];}
@@ -497,10 +531,14 @@ function updateTM(wi,di,li,sel){
   // 同負荷なので比は『感じたRIR vs 目標RIR』のみで決まる(loadは相殺)
   const ratio=(1+(reps+(10-felt))/30)/(1+(reps+(10-tR))/30);
   const c=cfg();
+  const before=c.tmFactor;
   let nf=c.tmFactor*(0.5+0.5*ratio);
   nf=Math.max(0.93,Math.min(1.07,nf));
   c.tmFactor=Math.round(nf*1000)/1000;
   c.lastLog=Math.max(c.lastLog,wi);
+  S.adjustments.push({lift:S.lift,week:wi,day:di,exercise:l[0],feel:+sel,targetRpe:tR,
+    factorBefore:before,factorAfter:c.tmFactor,createdAt:new Date().toISOString()});
+  if(S.adjustments.length>200)S.adjustments=S.adjustments.slice(-200);
 }
 
 /* ===== Sheets ===== */
@@ -559,7 +597,7 @@ function render(){
   document.getElementById('tgtin').value=c.tgt;
   document.getElementById('mode-focus').classList.toggle('on',S.mode==='focus');
   document.getElementById('mode-concurrent').classList.toggle('on',S.mode==='concurrent');
-  renderTabs(); renderFreq(); renderFeasib(); renderAR(); renderSched();
+  renderTabs(); renderFreq(); renderFeasib(); renderAR(); renderSched(); renderToday();
 
   app.innerHTML='';
   TPL.forEach((wk,wi)=>{
@@ -645,7 +683,12 @@ function renderAR(){
   if(c.tmFactor===1){el.innerHTML='';return;}
   const p=((c.tmFactor-1)*100); const sign=p>0?'+':'';
   const proj=round125(c.tgt*c.tmFactor);
-  el.innerHTML=`<div class="arbanner">📈 実測を反映中：以降の週を ${sign}${p.toFixed(1)}% 調整（推定到達 ≈ ${fmt(proj)}kg）<button onclick="resetAR()">解除</button></div>`;
+  const wk=c.lastLog>=0?`Week ${c.lastLog+1}`:'—';
+  const lastAdj=[...S.adjustments].reverse().find(a=>a.lift===S.lift);
+  const dir=lastAdj?(lastAdj.factorAfter>=lastAdj.factorBefore?'楽だった→強度UP':'重かった→強度DOWN'):'';
+  el.innerHTML=`<div class="arbanner"><div>📈 実測を反映中　以降の週 <b>${sign}${p.toFixed(1)}%</b><br>`+
+    `<span style="opacity:.8">最終反映 ${wk}${dir?'（'+dir+'）':''}　推定到達 ≈ ${fmt(proj)}kg</span></div>`+
+    `<button onclick="resetAR()">解除</button></div>`;
 }
 function renderSched(){
   const el=document.getElementById('sched');
@@ -670,6 +713,35 @@ function renderSched(){
   else{cls='bad';msg=`週${n}セッションは多すぎる傾向。特にデッドの頻度を1回に下げ、スクワットと連日にしないことを推奨します。`;}
   w.className='schedwarn '+cls; w.textContent=msg;
 }
+function todayStr(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+/* 今日のメニュー: 今日の日付が入った日 → なければ最初の未完了日 */
+function renderToday(){
+  const el=document.getElementById('today'); const td=todayStr();
+  let hit=null, firstInc=null;
+  TPL.forEach((wk,wi)=>activeDays(wk).forEach(({d,di})=>{
+    const dkey=`${S.lift}_${wi}_${di}`;
+    const work=d.lifts.map((l,li)=>({l,li})).filter(x=>x.l[0]!=='rest');
+    const allDone=work.length>0&&work.every(x=>S.checks[`${S.lift}_${wi}_${di}_${x.li}`]);
+    if(S.dates[dkey]===td&&!hit)hit={wi,di,d,wk};
+    if(!allDone&&!firstInc)firstInc={wi,di,d,wk};
+  }));
+  const pick=hit||firstInc;
+  if(!pick){el.style.display='none';return;}
+  el.style.display='block';
+  const {wi,di,d,wk}=pick;
+  const m=LIFTMETA[S.lift];
+  const items=d.lifts.map((l,li)=>{
+    if(l[0]==='rest')return `<div class="titem"><span class="nm">${m.names.rest}</span></div>`;
+    const id=`${S.lift}_${wi}_${di}_${li}`, ck=!!S.checks[id];
+    const nm=l[6]||m.names[l[0]]; const w=weightOf(wi,l[1]);
+    const sub=l[5]===3?`${fmt(w)}kg ×${l[2]}`:`${fmt(w)}kg × ${l[2]}×${l[3]}`;
+    return `<div class="titem${ck?' dn':''}"><span class="nm">${nm}</span><span class="wt">${sub}</span></div>`;
+  }).join('');
+  const head=hit?'今日のメニュー':'次のトレーニング';
+  el.onclick=()=>{S.open=wi;save();render();const e2=app.children[wi];if(e2)setTimeout(()=>e2.scrollIntoView({behavior:'smooth',block:'start'}),60);};
+  el.innerHTML=`<div class="thead"><span class="tt">${head}</span><span class="tgo">開く ▸</span></div>`+
+    `<div class="tsub">${m.short} ｜ ${d.n}</div><div class="tph">${wk.lab}</div>${items}`;
+}
 function updateBar(){
   let done=0,tot=0;
   TPL.forEach((wk,wi)=>activeDays(wk).forEach(({d,di})=>d.lifts.forEach((l,li)=>{if(l[0]==='rest')return;tot++; if(S.checks[`${S.lift}_${wi}_${di}_${li}`])done++;})));
@@ -686,8 +758,14 @@ function flash(){const t=document.getElementById('savetag'); t.textContent='✓ 
 function switchLift(k){if(S.lift===k)return; S.lift=k; S.open=0; save(); render(); window.scrollTo({top:0,behavior:'smooth'});}
 function setMode(m){S.mode=m; save(); render();}
 function setFreq(n){cfg().freq=n; save(); flash(); render();}
-function resetAR(){const c=cfg();c.tmFactor=1;c.lastLog=-1; save(); render(); toast('実測の自動調整を解除しました');}
-function setCfg(field,v){const n=parseFloat(v); if(!isNaN(n)&&n>0)cfg()[field]=n; save(); flash(); render();}
+function resetAR(){const c=cfg();c.tmFactor=1;c.lastLog=-1;
+  S.adjustments=S.adjustments.filter(a=>a.lift!==S.lift);
+  save(); render(); toast('実測の自動調整を解除しました');}
+function setCfg(field,v){const n=parseFloat(v);
+  if(isNaN(n)){toast('数値を入力してください');render();return;}
+  if(n<MINW||n>MAXW){toast(`${MINW}〜${MAXW}kg の範囲で入力してください`);render();return;}
+  cfg()[field]=round125(n); // プレート単位に丸め
+  save(); flash(); render();}
 function toggle(id){S.checks[id]=!S.checks[id]; if(!S.checks[id])delete S.checks[id]; save(); flash(); render();}
 function setDate(k,v){if(v)S.dates[k]=v;else delete S.dates[k]; save(); flash();}
 function setAct(id,v){if(v)S.actuals[id]=v;else delete S.actuals[id];
@@ -719,14 +797,26 @@ async function exportData(){
   }catch(e){toast('書き出しに失敗しました');}
 }
 function importData(inp){const f=inp.files[0];if(!f)return;const r=new FileReader();
-  r.onload=e=>{try{const d=JSON.parse(e.target.result);
-    S=Object.assign({mode:"concurrent",lift:"bench",cfg:{},dates:{},checks:{},actuals:{},open:0},d);
-    LIFTS.forEach(k=>{S.cfg[k]=Object.assign(defCfg(k),S.cfg[k]||{});});
-    save();render();toast('復元しました');}catch(err){toast('読み込み失敗');}};
+  r.onload=e=>{
+    const backup=JSON.stringify(S); // 失敗時の退避
+    let parsed;
+    try{parsed=JSON.parse(e.target.result);}
+    catch(err){toast('復元失敗: ファイルが壊れています（現在のデータは保持）');return;}
+    try{
+      if(!parsed||typeof parsed!=='object'||Array.isArray(parsed))throw 0;
+      S=sanitize(parsed); // 不足項目は既定値で補完・不正値は除外
+      save();render();toast('復元しました');
+    }catch(err){
+      try{S=sanitize(JSON.parse(backup));}catch(e2){}
+      render();toast('復元失敗: 形式が不正です（現在のデータは保持）');
+    }
+  };
+  r.onerror=()=>toast('復元失敗: 読み込めませんでした');
   r.readAsText(f);inp.value='';}
 function resetAll(){if(confirm('現在の種目('+LIFTMETA[S.lift].jp+')の日付・チェック・実測・自動調整を消去します。よろしいですか？\n※目標設定と他種目は残ります')){
   const pre=S.lift+'_';
   [['checks'],['dates'],['actuals']].forEach(([k])=>{Object.keys(S[k]).forEach(id=>{if(id.indexOf(pre)===0)delete S[k][id];});});
+  S.adjustments=S.adjustments.filter(a=>a.lift!==S.lift);
   cfg().tmFactor=1; cfg().lastLog=-1;
   save();render();toast('リセットしました');}}
 render();
