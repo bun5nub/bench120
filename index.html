@@ -6,9 +6,9 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="BENCH120">
-<meta name="theme-color" content="#0e0f12">
-<title>BENCH 120 ｜ ピーキング</title>
+<meta name="apple-mobile-web-app-title" content="BIG3 PEAK">
+<meta name="theme-color" content="#0a0a0b">
+<title>BIG3 PEAK ｜ 目標から自動設計</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;600;700;800;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -31,7 +31,7 @@ body{padding-bottom:calc(28px + var(--safe-bot));}
 /* ---- Header ---- */
 header{position:sticky;top:0;z-index:50;
   background:linear-gradient(180deg,#0a0a0b 72%,rgba(10,10,11,.92));
-  padding:calc(12px + var(--safe-top)) 16px 12px;border-bottom:2px solid var(--accent);
+  padding:calc(12px + var(--safe-top)) 16px 0;border-bottom:2px solid var(--accent);
   backdrop-filter:blur(8px);}
 .hrow{display:flex;align-items:center;justify-content:space-between;gap:10px;}
 .brand{display:flex;align-items:center;gap:11px;min-width:0;}
@@ -49,6 +49,28 @@ header{position:sticky;top:0;z-index:50;
 .barmeta{display:flex;justify-content:space-between;margin-top:10px;font-size:11px;color:var(--muted);}
 .barmeta .count{font-family:'DM Mono';color:var(--text);font-weight:500;}
 
+/* ---- Lift tabs ---- */
+.tabs{display:flex;gap:6px;margin-top:12px;}
+.tab{flex:1;background:transparent;border:none;border-bottom:3px solid transparent;
+  color:var(--muted);font-family:'Anton',sans-serif;font-size:15px;letter-spacing:.6px;
+  padding:9px 4px 10px;cursor:pointer;text-transform:uppercase;transition:.15s;}
+.tab.on{color:var(--accent);border-bottom-color:var(--accent);}
+
+/* ---- Setup card ---- */
+.setup{background:var(--surface);border:1px solid var(--line);border-radius:14px;margin:12px 12px 0;padding:13px 14px;}
+.setup .lbl{font-size:11px;color:var(--accent);font-weight:700;letter-spacing:.5px;margin-bottom:9px;text-transform:uppercase;}
+.inrow{display:flex;gap:10px;}
+.infield{flex:1;}
+.infield span{display:block;font-size:11px;color:var(--muted);margin-bottom:4px;}
+.infield .u{font-size:10px;color:var(--faint);}
+.numin{width:100%;background:var(--bg);border:1px solid var(--line);color:var(--text);
+  font-family:'DM Mono';font-size:18px;font-weight:500;border-radius:9px;padding:9px 10px;text-align:center;}
+.numin.tgt{border-color:var(--accent-dim);color:var(--accent);}
+.feasib{font-size:11.5px;line-height:1.5;margin-top:10px;border-radius:9px;padding:8px 10px;}
+.feasib.ok{color:var(--ok);background:rgba(95,184,90,.10);}
+.feasib.warn{color:var(--int);background:rgba(238,123,43,.12);}
+.feasib.bad{color:var(--test);background:rgba(255,77,77,.12);}
+
 /* ---- Toolbar ---- */
 .tools{display:flex;gap:8px;padding:12px 16px 4px;flex-wrap:wrap;}
 .tbtn{flex:1;min-width:84px;background:var(--surface);border:1px solid var(--line);
@@ -56,6 +78,7 @@ header{position:sticky;top:0;z-index:50;
   padding:10px 8px;border-radius:11px;cursor:pointer;text-align:center;}
 .tbtn:active{background:var(--elevated);}
 .tbtn.go{background:var(--accent);border-color:var(--accent);color:#170a05;}
+.tbtn.book{background:var(--elevated);border-color:var(--accent-dim);color:var(--accent);}
 
 .legend{display:flex;gap:6px;flex-wrap:wrap;padding:8px 16px 4px;}
 .lg{font-size:10px;color:var(--muted);display:flex;align-items:center;gap:4px;}
@@ -73,7 +96,6 @@ main{padding:8px 12px;}
 .wkprog.done{color:var(--ok);}
 .chev{color:var(--faint);font-size:13px;transition:transform .25s;}
 .wk.open .chev{transform:rotate(90deg);}
-.wkdone-badge{display:none;}
 .wk.alldone{border-left-color:var(--ok);}
 .wk.alldone .wkhead .lab::after{content:" ✓";color:var(--ok);}
 
@@ -137,7 +159,6 @@ main{padding:8px 12px;}
 .exname.tappable{cursor:pointer;}
 .exname .info{display:inline-block;margin-left:7px;font-size:10.5px;color:var(--accent);
   border:1px solid var(--accent-dim);border-radius:6px;padding:1px 6px;vertical-align:middle;font-weight:600;white-space:nowrap;}
-.tbtn.book{background:var(--elevated);border-color:var(--accent-dim);color:var(--accent);}
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);opacity:0;pointer-events:none;transition:.25s;z-index:200;}
 .overlay.show{opacity:1;pointer-events:auto;}
 .sheet{position:fixed;left:0;right:0;bottom:0;z-index:201;background:var(--surface);border-top:1px solid var(--line);
@@ -174,8 +195,8 @@ main{padding:8px 12px;}
         </svg>
       </div>
       <div>
-        <div class="logo">BENCH <b>120</b></div>
-        <div class="goal"><span id="dispmax">115</span> → <s>120 KG</s></div>
+        <div class="logo" id="logo">BIG3 <b id="liftname">BENCH</b></div>
+        <div class="goal"><span id="dispcur">115</span> → <s id="disptgt">120 KG</s></div>
       </div>
     </div>
     <div class="ring">
@@ -190,7 +211,19 @@ main{padding:8px 12px;}
     <span><span class="count" id="countlabel">0/0</span> 完了</span>
     <span class="savetag" id="savetag">✓ 自動保存</span>
   </div>
+  <div class="tabs" id="tabs"></div>
 </header>
+
+<div class="setup">
+  <div class="lbl" id="setuplbl">ベンチプレス｜目標設定</div>
+  <div class="inrow">
+    <label class="infield"><span>現在の最大 <i class="u">1RM kg</i></span>
+      <input class="numin" id="curin" type="number" inputmode="decimal" step="2.5" onchange="setCfg('cur',this.value)"></label>
+    <label class="infield"><span>目標 <i class="u">kg</i></span>
+      <input class="numin tgt" id="tgtin" type="number" inputmode="decimal" step="2.5" onchange="setCfg('tgt',this.value)"></label>
+  </div>
+  <div class="feasib" id="feasib"></div>
+</div>
 
 <div class="tools">
   <button class="tbtn go" onclick="jumpNext()">次の未完了へ</button>
@@ -211,7 +244,8 @@ main{padding:8px 12px;}
 <main id="app"></main>
 <div class="note">
   iPhoneでアプリ化:<br>Safariの共有ボタン → 「ホーム画面に追加」<br>
-  進捗は端末内に自動保存されます。機種変更や万一の消失に備え、時々「バックアップ書出」でファイルを保存してください。
+  種目を切替えて3種目それぞれの目標を設定できます。重量は現在値→目標値から自動設計されます。<br>
+  進捗は端末内に自動保存されます。機種変更に備え時々「バックアップ書出」を。
 </div>
 <div class="toast" id="toast"></div>
 
@@ -220,155 +254,223 @@ main{padding:8px 12px;}
 
 <script>
 const C={acc:'var(--acc)',int:'var(--int)',del:'var(--del)',peak:'var(--peak)',test:'var(--test)'};
-const PROGRAM=[
+
+/* ===== 週ごとの基準max進行(現在値→目標値) ピーキングカーブ ===== */
+const PROG=[0.15,0.30,0.42,0.45,0.55,0.68,0.80,0.82,0.88,0.94,0.97,1.00];
+
+/* ===== 周期化テンプレート(全リフト共通) =====
+   lift tuple: [role, pct(基準maxに対する割合), reps, sets, rpe, kind, labelOverride?]
+   kind: 0=休養 1=working 2=スピード 3=ウォームアップ                       */
+const TPL=[
  {lab:"Week 1 ｜ 第1ブロック 蓄積期",ph:"蓄積期",c:C.acc,
   intro:"量で土台構築・ボトム導入。RPEは『あと何回いけるか』。RPE7=余裕3回。",
   days:[
-   {n:"Day1 量",lifts:[["ベンチ(コンペ)",90,5,4,"RPE7",1],["ナロー(CGBP)",77.5,8,3,"RPE7",1]],memo:"補助:バーベルローイング4×8 / ライイングEXT3×10"},
-   {n:"Day2 ボトム",lifts:[["スポトプレス(胸2cm上1秒静止)",82.5,5,4,"RPE7",1],["足上げベンチ",83.75,6,3,"RPE7",1]],memo:"スポト/ピンはRPE優先(変種MAX不明の為)。補助:懸垂 or ローイング4×8 / OHP3×6"},
-   {n:"Day3 初速",lifts:[["ピンプレス(胸高ピン・デッド)",90,3,5,"RPE7",1],["ダイナミックベンチ",57.5,3,6,"速度50%",2]],memo:"Day3は速度が目的。50%を全力で押し離す。RPEではなく初速で管理"},
+   {n:"Day1 量",dt:"vol",lifts:[["comp",0.7775,5,4,"RPE7",1],["narrow",0.6695,8,3,"RPE7",1]]},
+   {n:"Day2 ボトム",dt:"bottom",lifts:[["spoto",0.7127,5,4,"RPE7",1],["feetup",0.7235,6,3,"RPE7",1]]},
+   {n:"Day3 初速",dt:"speed",lifts:[["pin",0.7775,3,5,"RPE7",1],["dynamic",0.4968,3,6,"",2]]},
   ]},
  {lab:"Week 2 ｜ 蓄積期",ph:"蓄積期",c:C.acc,intro:"微増。RPE7.5。",
   days:[
-   {n:"Day1 量",lifts:[["ベンチ(コンペ)",92.5,5,4,"RPE7.5",1],["ナロー",80,8,3,"RPE7.5",1]],memo:"補助:ローイング4×8 / ライイングEXT3×10"},
-   {n:"Day2 ボトム",lifts:[["スポトプレス",85,5,4,"RPE8",1],["足上げベンチ",85,6,3,"RPE7.5",1]],memo:"補助:懸垂/ローイング4×8 / OHP3×6"},
-   {n:"Day3 初速",lifts:[["ピンプレス(胸高)",92.5,3,5,"RPE7.5",1],["ダイナミックベンチ",60,3,6,"速度52.5%",2]],memo:"初速重視"},
+   {n:"Day1 量",dt:"vol",lifts:[["comp",0.7940,5,4,"RPE7.5",1],["narrow",0.6867,8,3,"RPE7.5",1]]},
+   {n:"Day2 ボトム",dt:"bottom",lifts:[["spoto",0.7296,5,4,"RPE8",1],["feetup",0.7296,6,3,"RPE7.5",1]]},
+   {n:"Day3 初速",dt:"speed",lifts:[["pin",0.7940,3,5,"RPE7.5",1],["dynamic",0.5150,3,6,"",2]]},
   ]},
  {lab:"Week 3 ｜ 蓄積期(ピーク量)",ph:"蓄積期",c:C.acc,intro:"本ブロック最大量。RPE8=余裕2回。",
   days:[
-   {n:"Day1 量",lifts:[["ベンチ(コンペ)",93.75,5,4,"RPE8",1],["ナロー",81.25,8,3,"RPE8",1]],memo:"補助:ローイング4×8 / ライイングEXT3×10"},
-   {n:"Day2 ボトム",lifts:[["スポトプレス",86.25,5,4,"RPE8",1],["足上げベンチ",86.25,6,3,"RPE8",1]],memo:"補助:懸垂/ローイング4×8 / OHP3×6"},
-   {n:"Day3 初速",lifts:[["ピンプレス(胸高)",92.5,3,5,"RPE8",1],["ダイナミックベンチ",63.75,3,6,"速度55%",2]],memo:"初速重視"},
+   {n:"Day1 量",dt:"vol",lifts:[["comp",0.8006,5,4,"RPE8",1],["narrow",0.6938,8,3,"RPE8",1]]},
+   {n:"Day2 ボトム",dt:"bottom",lifts:[["spoto",0.7365,5,4,"RPE8",1],["feetup",0.7365,6,3,"RPE8",1]]},
+   {n:"Day3 初速",dt:"speed",lifts:[["pin",0.7900,3,5,"RPE8",1],["dynamic",0.5444,3,6,"",2]]},
   ]},
  {lab:"Week 4 ｜ ★デロード(完全回復週)★",ph:"デロード",c:C.del,intro:"半分の量・軽負荷で疲労を抜く。絶対に追い込まない。",
   days:[
-   {n:"Day1",lifts:[["ベンチ(コンペ)",75,5,2,"RPE5",1]],memo:"動きの確認のみ"},
-   {n:"Day2",lifts:[["足上げベンチ",70,5,2,"RPE5",1]],memo:"余裕を残す"},
-   {n:"Day3",lifts:[["ピンプレス(胸高)",75,3,3,"RPE5",1]],memo:"軽く初速だけ"},
+   {n:"Day1",dt:"deload",lifts:[["comp",0.6397,5,2,"RPE5",1]]},
+   {n:"Day2",dt:"deload",lifts:[["feetup",0.5970,5,2,"RPE5",1]]},
+   {n:"Day3",dt:"deload",lifts:[["pin",0.6397,3,3,"RPE5",1]]},
   ]},
  {lab:"Week 5 ｜ 第2ブロック 強度期",ph:"強度期",c:C.int,intro:"重量帯へ(86%〜)。RPE8。ボトム特化を強化。",
   days:[
-   {n:"Day1 強度",lifts:[["ベンチ(コンペ)",98.75,3,4,"RPE8",1],["ピンプレス(胸高)",95,3,3,"RPE8",1]],memo:"補助:ローイング4×6 / ライイングEXT3×8"},
-   {n:"Day2 ボトム",lifts:[["スポトプレス",90,3,4,"RPE8",1],["ナロー",88.75,5,3,"RPE8",1]],memo:"補助:懸垂/ローイング4×6"},
-   {n:"Day3 初速",lifts:[["ピンプレス(胸高・デッド)",95,2,5,"RPE8",1],["ダイナミックベンチ",70,3,6,"速度60%",2]],memo:"重い初速。爆発的に"},
+   {n:"Day1 強度",dt:"intensity",lifts:[["comp",0.8386,3,4,"RPE8",1],["pin",0.8068,3,3,"RPE8",1]]},
+   {n:"Day2 ボトム",dt:"bottom",lifts:[["spoto",0.7643,3,4,"RPE8",1],["narrow",0.7537,5,3,"RPE8",1]]},
+   {n:"Day3 初速",dt:"speed",lifts:[["pin",0.8068,2,5,"RPE8",1],["dynamic",0.5945,3,6,"",2]]},
   ]},
  {lab:"Week 6 ｜ 強度期",ph:"強度期",c:C.int,intro:"RPE8.5。",
   days:[
-   {n:"Day1 強度",lifts:[["ベンチ(コンペ)",101.25,3,4,"RPE8.5",1],["ピンプレス(胸高)",98.75,2,3,"RPE8.5",1]],memo:"補助:ローイング4×6 / ライイングEXT3×8"},
-   {n:"Day2 ボトム",lifts:[["スポトプレス",92.5,3,4,"RPE8.5",1],["ナロー",90,5,3,"RPE8.5",1]],memo:"補助:懸垂/ローイング4×6"},
-   {n:"Day3 初速",lifts:[["ピンプレス(胸高・デッド)",98.75,2,5,"RPE8.5",1],["ダイナミックベンチ",72.5,3,6,"速度62.5%",2]],memo:"重い初速"},
+   {n:"Day1 強度",dt:"intensity",lifts:[["comp",0.8552,3,4,"RPE8.5",1],["pin",0.8340,2,3,"RPE8.5",1]]},
+   {n:"Day2 ボトム",dt:"bottom",lifts:[["spoto",0.7813,3,4,"RPE8.5",1],["narrow",0.7601,5,3,"RPE8.5",1]]},
+   {n:"Day3 初速",dt:"speed",lifts:[["pin",0.8340,2,5,"RPE8.5",1],["dynamic",0.6123,3,6,"",2]]},
   ]},
  {lab:"Week 7 ｜ 強度期(ピーク強度)",ph:"強度期",c:C.int,intro:"本ブロック最重。RPE9=余裕1回。",
   days:[
-   {n:"Day1 強度",lifts:[["ベンチ(コンペ)",106.25,2,4,"RPE9",1],["ピンプレス(胸高)",101.25,2,3,"RPE9",1]],memo:"補助:ローイング4×6"},
-   {n:"Day2 ボトム",lifts:[["スポトプレス",95,2,4,"RPE9",1],["ナロー",93.75,4,3,"RPE9",1]],memo:"補助:懸垂/ローイング4×6"},
-   {n:"Day3 初速",lifts:[["ピンプレス(胸高・デッド)",101.25,2,4,"RPE9",1],["ダイナミックベンチ",75,3,5,"速度65%",2]],memo:"重い初速"},
+   {n:"Day1 強度",dt:"intensity",lifts:[["comp",0.8929,2,4,"RPE9",1],["pin",0.8508,2,3,"RPE9",1]]},
+   {n:"Day2 ボトム",dt:"bottom",lifts:[["spoto",0.7983,2,4,"RPE9",1],["narrow",0.7878,4,3,"RPE9",1]]},
+   {n:"Day3 初速",dt:"speed",lifts:[["pin",0.8508,2,4,"RPE9",1],["dynamic",0.6303,3,5,"",2]]},
   ]},
  {lab:"Week 8 ｜ ★デロード★",ph:"デロード",c:C.del,intro:"2回目の回復週。ピーキング前に疲労を完全に抜く。",
   days:[
-   {n:"Day1",lifts:[["ベンチ(コンペ)",80,3,3,"RPE5",1]],memo:"軽く"},
-   {n:"Day2",lifts:[["スポトプレス",72.5,3,2,"RPE5",1]],memo:"軽く"},
-   {n:"Day3",lifts:[["ピンプレス(胸高)",80,2,3,"RPE5",1]],memo:"軽く初速"},
+   {n:"Day1",dt:"deload",lifts:[["comp",0.6717,3,3,"RPE5",1]]},
+   {n:"Day2",dt:"deload",lifts:[["spoto",0.6087,3,2,"RPE5",1]]},
+   {n:"Day3",dt:"deload",lifts:[["pin",0.6717,2,3,"RPE5",1]]},
   ]},
  {lab:"Week 9 ｜ 第3ブロック ピーキング",ph:"ピーク",c:C.peak,intro:"量を絞り強度へ。疲労が抜け『隠れた筋力』が出始める。",
   days:[
-   {n:"Day1 重",lifts:[["ベンチ(コンペフォーム)",106.25,2,3,"RPE9",1]],memo:"補助は最小(ローイング2×8のみ)"},
-   {n:"Day2 維持",lifts:[["ピンプレス(胸高)",95,2,3,"RPE8",1]],memo:"ボトム維持。追い込まない"},
-   {n:"Day3 技術",lifts:[["ダイナミックベンチ",75,3,4,"速度65%",2]],memo:"速度と技術のみ。疲労を残さない"},
+   {n:"Day1 重",dt:"peak",lifts:[["comp",0.8898,2,3,"RPE9",1]]},
+   {n:"Day2 維持",dt:"peak",lifts:[["pin",0.7956,2,3,"RPE8",1]]},
+   {n:"Day3 技術",dt:"speed",lifts:[["dynamic",0.6281,3,4,"",2]]},
   ]},
  {lab:"Week 10 ｜ ピーキング",ph:"ピーク",c:C.peak,intro:"単発中心。神経系を高重量に慣らす。",
   days:[
-   {n:"Day1 重",lifts:[["ベンチ(コンペフォーム)",110,1,3,"RPE9",1]],memo:"1回ずつ丁寧に"},
-   {n:"Day2 維持",lifts:[["スポトプレス",90,2,2,"RPE7",1]],memo:"軽め維持"},
-   {n:"Day3 技術",lifts:[["ダイナミックベンチ",70,3,3,"速度60%",2]],memo:"完全に軽く"},
+   {n:"Day1 重",dt:"peak",lifts:[["comp",0.9190,1,3,"RPE9",1]]},
+   {n:"Day2 維持",dt:"peak",lifts:[["spoto",0.7519,2,2,"RPE7",1]]},
+   {n:"Day3 技術",dt:"speed",lifts:[["dynamic",0.5848,3,3,"",2]]},
   ]},
  {lab:"Week 11 ｜ テーパー(調整)",ph:"ピーク",c:C.peak,intro:"量を大幅カット。重い単発で感覚だけ研ぐ。【最大は絶対に引かない】",
   days:[
-   {n:"Day1 研ぎ",lifts:[["ベンチ(コンペフォーム)",107.5,1,2,"RPE8.5",1]],memo:"94%=RPE8.5。キレ重視。本番は来週。ここで最大を引くと疲労が戻る"},
-   {n:"Day2 軽",lifts:[["ダイナミックベンチ",70,3,2,"速度60%",2]],memo:"血流促進程度"},
-   {n:"Day3",lifts:[["完全休養 or 軽い有酸素",0,0,0,"休む",0]],memo:"休む勇気。ピーキングの肝"},
+   {n:"Day1 研ぎ",dt:"peak",lifts:[["comp",0.8970,1,2,"RPE8.5",1]]},
+   {n:"Day2 軽",dt:"speed",lifts:[["dynamic",0.5841,3,2,"",2]]},
+   {n:"Day3",dt:"rest",lifts:[["rest",0,0,0,"",0]]},
   ]},
- {lab:"Week 12 ｜ ★120kgアタック★",ph:"テスト",c:C.test,intro:"テスト日。各セット間3〜5分休む。下のウォームアップから順にチェック。",
+ {lab:"Week 12 ｜ ★目標アタック★",ph:"テスト",c:C.test,intro:"テスト日。各セット間3〜5分休む。下のウォームアップから順にチェック。",
   days:[
-   {n:"Test",lifts:[
-     ["W-up①",60,3,1,"",3],["W-up②",80,3,1,"",3],["W-up③",95,2,1,"",3],["W-up④",105,1,1,"",3],
-     ["第1試技 opener",107.5,1,1,"RPE8",1],["第2試技",115,1,1,"RPE9.5",1],["★第3試技 本命★",120,1,1,"RPE10",1]],
-    memo:"opener107.5(93%)は確実に挙がる重量。120成功で余裕あれば122.5も可"},
+   {n:"Test",dt:"test",lifts:[
+     ["warmup",0.5000,3,1,"",3,"W-up①"],["warmup",0.6667,3,1,"",3,"W-up②"],["warmup",0.7917,2,1,"",3,"W-up③"],["warmup",0.8750,1,1,"",3,"W-up④"],
+     ["comp",0.8958,1,1,"RPE8",1,"第1試技 opener"],["comp",0.9583,1,1,"RPE9.5",1,"第2試技"],["comp",1.0000,1,1,"RPE10",1,"★第3試技 本命★"]]},
   ]},
 ];
 
-const KEY="bench120_v2";
-let S={dates:{},checks:{},actuals:{},open:0};
-try{const r=localStorage.getItem(KEY); if(r)S=Object.assign(S,JSON.parse(r));}catch(e){}
-
-function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
-function fmt(w){return (Number.isInteger(w)?w:w).toString();}
+/* ===== リフト定義(種目名・補助・説明) ===== */
+const LIFTS=["bench","squat","deadlift"];
+const LIFTMETA={
+ bench:{jp:"ベンチプレス",short:"BENCH",cur:115,tgt:120,
+   names:{comp:"ベンチ(コンペ)",narrow:"ナロー(クローズグリップ)",spoto:"スポトプレス",feetup:"足上げベンチ",pin:"ピンプレス(胸高・デッドストップ)",dynamic:"ダイナミックベンチ",warmup:"ウォームアップ",rest:"完全休養"},
+   acc:{vol:"補助: バーベルローイング4×8 / ライイングトライセップEXT3×10",bottom:"補助: 懸垂 or ローイング4×8 / OHP3×6",speed:"初速が目的。胸から全力で押し離す。重さでなく速度で管理。",deload:"動きの確認のみ。余裕を残して終える。",intensity:"補助: ローイング4×6 / ライイングEXT3×8",peak:"補助は最小限(ローイング2×8のみ)。追い込まない。",test:"opener(約90%)は確実に挙がる重量。本命成功で余裕あれば+2.5kgも可。"},
+ },
+ squat:{jp:"スクワット",short:"SQUAT",cur:130,tgt:160,
+   names:{comp:"スクワット(コンペ)",narrow:"フロントスクワット",spoto:"ポーズスクワット(ボトム1秒)",feetup:"テンポスクワット(3秒下ろし)",pin:"ボックス/ピンスクワット(デッドストップ)",dynamic:"ダイナミックスクワット",warmup:"ウォームアップ",rest:"完全休養"},
+   acc:{vol:"補助: ルーマニアンDL4×8 / レッグカール3×12",bottom:"補助: ブルガリアンSQ3×8 / レッグエクステンション3×12",speed:"初速が目的。立ち上がりを爆発的に。重さでなく速度で管理。",deload:"動きの確認のみ。余裕を残して終える。",intensity:"補助: ルーマニアンDL4×6 / レッグカール3×10",peak:"補助は最小限。フォーム維持のみ。",test:"opener(約90%)は確実に挙がる重量。本命成功で余裕あれば+2.5kgも可。"},
+ },
+ deadlift:{jp:"デッドリフト",short:"DEAD",cur:160,tgt:200,
+   names:{comp:"デッドリフト(コンペ)",narrow:"ブロック/ラックプル(ロックアウト)",spoto:"デフィシットデッド(初動強化)",feetup:"ポーズデッド(膝下1秒静止)",pin:"デッドストップ・デッド(毎回床で静止)",dynamic:"スピードデッドリフト",warmup:"ウォームアップ",rest:"完全休養"},
+   acc:{vol:"補助: 懸垂4×8 / ヒップスラスト3×10",bottom:"補助: ベントオーバーロー4×8 / バックエクステンション3×12",speed:"初速が目的。床から爆発的に引く。重さでなく速度で管理。",deload:"動きの確認のみ。余裕を残して終える。",intensity:"補助: ペンドレイロー4×6 / グッドモーニング3×8",peak:"補助は最小限。神経系の準備のみ。",test:"opener(約90%)は確実に挙がる重量。本命成功で余裕あれば+2.5kgも可。引き過ぎ注意。"},
+ },
+};
 
 /* ===== 種目の説明 ===== */
 const EXPLAIN={
- base:{t:"基本フォーム & 安全",diff:"全種目に共通。まずここを押さえる。",
-   how:["ベンチに寝て、目線がバーの真下にくる位置に","肩甲骨を寄せて下げる(胸を張る)。軽くアーチを作る","足は床をしっかり踏む(かかとを引く)","グリップは肩幅よりやや広め。親指は必ず握り込む(サムレス厳禁)","息を吸って腹圧 → みぞおち〜乳頭の間へコントロールして下ろす → 脚で床を押しながら肩の上へ押し切る"],
-   aim:"全バリエーションの土台になるフォーム。",
-   warn:"ラックのセーフティピンを必ず『胸の高さの少し下』にセット。潰れてもバーが止まります。1人の時・高重量・ポーズ系では必須。"},
- comp:{t:"ベンチ(コンペ)",diff:"基本フォームそのまま。毎回まったく同じ動きで反復する。",
-   how:["みぞおち〜乳頭の間に下ろし、胸に軽く触れる","止めずに(または一定リズムで)肩の上へ押し切る","毎回同じフォーム・同じ軌道を意識する"],
-   aim:"本番フォームの固め・再現性。",warn:"フォームを毎回ブレさせないことが最優先。"},
- narrow:{t:"ナロー(クローズグリップ)",diff:"手幅を狭め、肘を締めて腕(三頭筋)で押す。",
-   how:["手幅を肩幅くらいに(狭めすぎ厳禁)","肘を体側に近づけて、みぞおち寄りに下ろす","胸より腕の裏(三頭筋)で押す感覚で挙げる"],
-   aim:"三頭筋・ロックアウト(押し切り)の強化。",warn:"狭くしすぎると手首を痛める。肩肘が痛ければ少し広げる。"},
- paused:{t:"ポーズベンチ(2秒静止)",diff:"胸で2秒止めてから押す(反動を使わない)。",
-   how:["胸に着けたら動きを止めて2秒キープ","止めている間も全身の張りは抜かない","2秒後に脚で押しながら挙げる"],
-   aim:"胸からゼロで押し出す力。あなたの弱点(ボトム)を直撃。",warn:"重量は通常より落ちて当然。バウンドさせない。"},
- spoto:{t:"スポトプレス",diff:"胸に着けず、胸の手前で止める。",
-   how:["胸の2〜3cm手前まで下ろす","そこで1秒静止(バーは胸に触れない)","静止位置から押し上げる"],
-   aim:"一番詰まる局面そのものを鍛える。",warn:"止める高さを毎回一定に。最初は鏡や補助者で位置確認を。"},
- feetup:{t:"足上げベンチ",diff:"足を床から離し、上半身だけで挙げる。",
-   how:["足をベンチに乗せる、または膝を曲げて宙に上げる","アーチ・脚の反動を使わず、大胸筋と体幹で挙げる","バランスを保ちながらゆっくり動作"],
-   aim:"脚に頼らない純粋な上半身の力。",warn:"バランスを崩しやすい→重量控えめ・セーフティ必須・腰を反りすぎない。"},
- pin:{t:"ピンプレス(胸高ピン・デッドストップ) ★最重要",diff:"ピンに置いた静止状態から、ゼロ初速で押す。",
-   how:["ラックのピンを『胸に着く高さ』にセット","バーをピンに完全に置き、一瞬力を抜く","止まった状態から一気に押し上げる"],
-   aim:"ボトムの絶対筋力。あなたの最強の武器。",warn:"毎回しっかり降ろし切り、脱力してから押す。反動を使わない。"},
- dynamic:{t:"ダイナミックベンチ(スピード)",diff:"軽い重量を、押すときだけ全力で速く。",
-   how:["軽い重量(50〜65%)を使う","下ろしは普通の速さで","押す瞬間だけ爆発的に・できる限り速く挙げる"],
-   aim:"胸からの初速(力の立ち上がり)を上げる。",warn:"重さでなく速度が目的。バーは握ったまま加速し放り投げない。セット間はしっかり休む。"},
- warmup:{t:"ウォームアップ",diff:"本番前の準備セット。",
-   how:["軽い重量から段階的に上げる","フォーム確認と関節を温めるのが目的","疲れない範囲で(追い込まない)"],
-   aim:"本番の重量に体を慣らす。",warn:"ここで疲労を残さない。"},
- rest:{t:"完全休養",diff:"トレーニングを休む日。",
-   how:["重い練習はしない","軽い有酸素やストレッチはOK"],
-   aim:"疲労を抜いて回復する(ピーキングの肝)。",warn:"『休む勇気』。ここで追い込むと本番に響く。"},
+ bench:{
+  base:{t:"基本フォーム & 安全",diff:"全種目に共通。まずここを押さえる。",
+    how:["ベンチに寝て、目線がバーの真下にくる位置に","肩甲骨を寄せて下げる(胸を張る)。軽くアーチを作る","足は床をしっかり踏む(かかとを引く)","グリップは肩幅よりやや広め。親指は必ず握り込む(サムレス厳禁)","息を吸って腹圧 → みぞおち〜乳頭の間へコントロールして下ろす → 脚で床を押しながら肩の上へ押し切る"],
+    aim:"全バリエーションの土台になるフォーム。",
+    warn:"ラックのセーフティを必ず『胸の高さの少し下』にセット。潰れてもバーが止まります。"},
+  comp:{t:"ベンチ(コンペ)",diff:"基本フォームそのまま。毎回まったく同じ動きで反復する。",
+    how:["みぞおち〜乳頭の間に下ろし、胸に軽く触れる","止めずに(または一定リズムで)肩の上へ押し切る","毎回同じフォーム・同じ軌道を意識する"],
+    aim:"本番フォームの固め・再現性。",warn:"フォームを毎回ブレさせないことが最優先。"},
+  narrow:{t:"ナロー(クローズグリップ)",diff:"手幅を狭め、肘を締めて腕(三頭筋)で押す。",
+    how:["手幅を肩幅くらいに(狭めすぎ厳禁)","肘を体側に近づけて、みぞおち寄りに下ろす","胸より腕の裏(三頭筋)で押す感覚で挙げる"],
+    aim:"三頭筋・ロックアウト(押し切り)の強化。",warn:"狭くしすぎると手首を痛める。肩肘が痛ければ少し広げる。"},
+  spoto:{t:"スポトプレス",diff:"胸に着けず、胸の手前で止める。",
+    how:["胸の2〜3cm手前まで下ろす","そこで1秒静止(バーは胸に触れない)","静止位置から押し上げる"],
+    aim:"一番詰まる局面そのものを鍛える。",warn:"止める高さを毎回一定に。"},
+  feetup:{t:"足上げベンチ",diff:"足を床から離し、上半身だけで挙げる。",
+    how:["足をベンチに乗せる、または膝を曲げて宙に上げる","アーチ・脚の反動を使わず、大胸筋と体幹で挙げる","バランスを保ちながらゆっくり動作"],
+    aim:"脚に頼らない純粋な上半身の力。",warn:"バランスを崩しやすい→重量控えめ・セーフティ必須。"},
+  pin:{t:"ピンプレス(胸高・デッドストップ) ★最重要",diff:"ピンに置いた静止状態から、ゼロ初速で押す。",
+    how:["ラックのピンを『胸に着く高さ』にセット","バーをピンに完全に置き、一瞬力を抜く","止まった状態から一気に押し上げる"],
+    aim:"ボトムの絶対筋力。最強の武器。",warn:"毎回しっかり降ろし切り、脱力してから押す。反動を使わない。"},
+  dynamic:{t:"ダイナミックベンチ(スピード)",diff:"軽い重量を、押すときだけ全力で速く。",
+    how:["軽い重量(50〜65%)を使う","下ろしは普通の速さで","押す瞬間だけ爆発的に・できる限り速く挙げる"],
+    aim:"胸からの初速(力の立ち上がり)を上げる。",warn:"重さでなく速度が目的。セット間はしっかり休む。"},
+ },
+ squat:{
+  base:{t:"基本フォーム & 安全",diff:"全種目に共通。まずここを押さえる。",
+    how:["バーを僧帽筋に乗せ、手で固定し胸を張る","足幅は肩幅〜やや広め、つま先はやや外向き","息を吸って腹圧を高める","股関節と膝を同時に曲げ、太ももが床と平行(以下)まで沈む","かかと重心で床を押し、まっすぐ立ち上がる"],
+    aim:"全バリエーションの土台になるフォーム。",
+    warn:"パワーラックのセーフティを『ボトムの少し下』にセット。潰れてもバーを置ける高さに。"},
+  comp:{t:"スクワット(コンペ)",diff:"基本フォームそのまま。毎回同じ深さ・同じ軌道で反復。",
+    how:["規定の深さ(平行以下)まで確実に沈む","膝とつま先の向きを揃える","一定リズムで立ち上がる"],
+    aim:"本番フォームの固め・再現性。",warn:"深さを毎回一定に。浅くなりやすいので注意。"},
+  narrow:{t:"フロントスクワット",diff:"バーを鎖骨前で担ぎ、上体を立てて四頭筋で挙げる。",
+    how:["バーを肩の前(鎖骨)に乗せ肘を高く","上体を垂直に保ったまま沈む","四頭筋で押し上げる"],
+    aim:"立ち上がり・上体の起こし(前傾負け対策)。",warn:"手首・肩が硬いと辛い。無理なら胸の前でクロスグリップ。"},
+  spoto:{t:"ポーズスクワット(ボトム1秒)",diff:"ボトムで1秒止めてから立つ(反動なし)。",
+    how:["最深部まで沈む","姿勢を保ったまま1秒静止","反動を使わず立ち上がる"],
+    aim:"ボトムからのゼロ初速。一番詰まる局面を直撃。",warn:"重量は落ちて当然。腰が丸まらないよう体幹を固める。"},
+  feetup:{t:"テンポスクワット(3秒下ろし)",diff:"3秒かけてゆっくり下ろし、コントロールして立つ。",
+    how:["3カウントで沈む","ボトムで反動を使わない","通常速度で立ち上がる"],
+    aim:"フォーム安定・筋持久・下降のコントロール。",warn:"重量控えめ。雑に落とさない。"},
+  pin:{t:"ボックス/ピンスクワット(デッドストップ)",diff:"ボックスやピンに触れて一瞬静止してから立つ。",
+    how:["ボックスに軽く触れる(ドスンと座らない)or ピンに置く","一瞬脱力して止まる","止まった状態から爆発的に立つ"],
+    aim:"ボトムの絶対筋力・立ち上がりの瞬発力。",warn:"高さを毎回一定に。腰から落ちないよう注意。"},
+  dynamic:{t:"ダイナミックスクワット(スピード)",diff:"軽い重量を、立ち上がりだけ全力で速く。",
+    how:["軽い重量(50〜65%)を使う","下ろしは普通の速さ","立ち上がりを爆発的に速く"],
+    aim:"立ち上がりの初速・力の立ち上がりを上げる。",warn:"重さでなく速度が目的。フォームは崩さない。"},
+ },
+ deadlift:{
+  base:{t:"基本フォーム & 安全",diff:"全種目に共通。まずここを押さえる。",
+    how:["バーは足の中央の真上、すねの近く","お尻を引き、背中はまっすぐ(丸めない)","息を吸って腹圧、広背筋でバーを引き寄せる","床を押す感覚で、膝と股関節を同時に伸ばす","バーは体に沿わせ、立ち切ったら肩は後ろへ"],
+    aim:"全バリエーションの土台になるフォーム。",
+    warn:"腰を丸めない事が最優先。重量より背中のニュートラル維持。プレートは床に降ろしてリセット。"},
+  comp:{t:"デッドリフト(コンペ)",diff:"基本フォームそのまま。毎回同じセットアップで引く。",
+    how:["毎回同じ足幅・グリップ・バー位置","床から一定のリズムで引く","立ち切りで完全にロックアウト"],
+    aim:"本番フォームの固め・再現性。",warn:"セットアップを毎回一定に。背中を丸めない。"},
+  narrow:{t:"ブロック/ラックプル(ロックアウト)",diff:"膝下の高さから引く(可動域を狭める)。",
+    how:["ブロックやラックのピンで膝下にバーをセット","通常フォームでセットアップ","上半分(ロックアウト)を強く引き切る"],
+    aim:"ロックアウト・背中上部の強化。",warn:"高重量を扱える種目。背中を丸めない・引き過ぎない。"},
+  spoto:{t:"デフィシットデッド(初動強化)",diff:"低い台に乗り、床より深い位置から引く。",
+    how:["2〜5cmの台に立つ","通常より深い位置からセットアップ","床からの一番きつい初動を強く引く"],
+    aim:"床からの初動(ボトム)の筋力。弱点を直撃。",warn:"可動域が増え腰が丸まりやすい→重量控えめ・体幹を固める。"},
+  feetup:{t:"ポーズデッド(膝下1秒静止)",diff:"膝の高さで1秒止めてから引き切る。",
+    how:["床から引き始める","膝下の高さで1秒静止","姿勢を保ったまま引き切る"],
+    aim:"引きの軌道・姿勢維持・弱点の局面強化。",warn:"静止中に背中が丸まらないよう注意。"},
+  pin:{t:"デッドストップ・デッド(毎回床で静止)",diff:"1レップごとに床で完全に静止し、反動を消して引く。",
+    how:["1回ごとにバーを床に置く","一瞬脱力して反動を消す","止まった状態からゼロ初速で引く"],
+    aim:"床からの絶対筋力。反動に頼らない引き。",warn:"タッチ&ゴーにしない。毎回セットアップし直す。"},
+  dynamic:{t:"スピードデッドリフト",diff:"軽い重量を、床から全力で速く引く。",
+    how:["軽い重量(50〜65%)を使う","セットアップを丁寧に","床から爆発的に・速く引く"],
+    aim:"床からの初速・力の立ち上がりを上げる。",warn:"重さでなく速度が目的。背中は丸めない。"},
+ },
 };
-function infoKey(name){
- if(name.includes('ナロー'))return 'narrow';
- if(name.includes('スポト'))return 'spoto';
- if(name.includes('足上げ'))return 'feetup';
- if(name.includes('ピンプレス'))return 'pin';
- if(name.includes('ダイナミック'))return 'dynamic';
- if(name.includes('ポーズ'))return 'paused';
- if(name.includes('W-up'))return 'warmup';
- if(name.includes('休養')||name.includes('休'))return 'rest';
- if(name.includes('ベンチ'))return 'comp';
- return null;
-}
+/* 全リフト共通 */
+function EX(role){return EXPLAIN[S.lift][role]||null;}
+const WARMUP_EX={t:"ウォームアップ",diff:"本番前の準備セット。",how:["軽い重量から段階的に上げる","フォーム確認と関節を温めるのが目的","疲れない範囲で(追い込まない)"],aim:"本番の重量に体を慣らす。",warn:"ここで疲労を残さない。"};
+const REST_EX={t:"完全休養",diff:"トレーニングを休む日。",how:["重い練習はしない","軽い有酸素やストレッチはOK"],aim:"疲労を抜いて回復する(ピーキングの肝)。",warn:"『休む勇気』。ここで追い込むと本番に響く。"};
+function getExplain(role){if(role==="warmup")return WARMUP_EX;if(role==="rest")return REST_EX;if(role==="base")return EXPLAIN[S.lift].base;return EX(role);}
+
+/* ===== State ===== */
+const KEY="big3_v1";
+let S={lift:"bench",cfg:{},dates:{},checks:{},actuals:{},open:0};
+LIFTS.forEach(k=>{S.cfg[k]={cur:LIFTMETA[k].cur,tgt:LIFTMETA[k].tgt};});
+try{const r=localStorage.getItem(KEY); if(r){const p=JSON.parse(r);
+  S=Object.assign(S,p);
+  LIFTS.forEach(k=>{if(!S.cfg[k])S.cfg[k]={cur:LIFTMETA[k].cur,tgt:LIFTMETA[k].tgt};});}}catch(e){}
+
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+function cfg(){return S.cfg[S.lift];}
+function fmt(w){const r=Math.round(w*100)/100; return (Number.isInteger(r)?r:r).toString();}
+function round125(x){return Math.round(x/1.25)*1.25;}
+function refMax(wi){const c=cfg();return c.cur+(c.tgt-c.cur)*PROG[wi];}
+function weightOf(wi,pct){return round125(refMax(wi)*pct);}
+
+/* ===== Sheets ===== */
 function sheetShow(html){document.getElementById('sheetbody').innerHTML=html;
  document.getElementById('overlay').classList.add('show');document.getElementById('sheet').classList.add('show');}
 function closeSheet(){document.getElementById('overlay').classList.remove('show');document.getElementById('sheet').classList.remove('show');}
-function openInfo(key){const e=EXPLAIN[key];if(!e)return;
+function openInfo(role){const e=getExplain(role);if(!e)return;
  let h=`<h3>${e.t}</h3><div class="diff">${e.diff}</div>`;
  h+=`<h4>やり方</h4><ol>${e.how.map(s=>`<li>${s}</li>`).join('')}</ol>`;
  h+=`<h4>狙い</h4><div class="box aim">${e.aim}</div>`;
  h+=`<h4>注意</h4><div class="box warn">${e.warn}</div>`;
- if(key!=='base'){h+=`<h4 style="margin-top:18px">共通</h4><button class="idxbtn" onclick="openInfo('base')">基本フォーム & 安全<small>全種目共通の構え・セーフティの置き方</small></button>`;}
+ if(role!=='base'){h+=`<h4 style="margin-top:18px">共通</h4><button class="idxbtn" onclick="openInfo('base')">基本フォーム & 安全<small>${LIFTMETA[S.lift].jp}の構え・セーフティの置き方</small></button>`;}
  sheetShow(h);}
 function openIndex(){
- const order=[['base','まずこれ。共通の構え・セーフティ'],['comp','本番フォームの固め'],['narrow','三頭・押し切りの強化'],
-  ['paused','ボトムの力(弱点直撃)'],['spoto','詰まる局面を鍛える(弱点直撃)'],['feetup','脚に頼らない上半身'],
-  ['pin','ボトム絶対筋力(最重要の武器)'],['dynamic','胸からの初速・爆発力'],['warmup','本番前の準備'],['rest','回復日']];
- let h=`<h3>種目の説明</h3><div class="diff">見たい種目をタップ。各週の種目名の「ⓘやり方」からも開けます。</div>`;
- h+=order.map(([k,d])=>`<button class="idxbtn" onclick="openInfo('${k}')">${EXPLAIN[k].t}<small>${d}</small></button>`).join('');
+ const nm=LIFTMETA[S.lift].names;
+ const order=[['base','まずこれ。共通の構え・セーフティ'],['comp','本番フォームの固め'],['narrow','補助①'],
+  ['feetup','補助②'],['spoto','弱点の局面を直撃'],['pin','ボトム絶対筋力(最重要の武器)'],
+  ['dynamic','初速・爆発力'],['warmup','本番前の準備'],['rest','回復日']];
+ let h=`<h3>種目の説明 ｜ ${LIFTMETA[S.lift].jp}</h3><div class="diff">見たい種目をタップ。各週の種目名の「ⓘやり方」からも開けます。</div>`;
+ h+=order.map(([k,d])=>{const e=getExplain(k);return `<button class="idxbtn" onclick="openInfo('${k}')">${e.t}<small>${d}</small></button>`;}).join('');
  sheetShow(h);}
 
-
+/* ===== 推奨(前回フィードバックから) ===== */
 const app=document.getElementById('app');
 function deltaFromFeel(feelVal,tRPE){
   if(!feelVal||isNaN(tRPE))return null;
@@ -380,59 +482,75 @@ function deltaFromFeel(feelVal,tRPE){
   return -5;
 }
 function priorDelta(wi,di,li){
-  const key=infoKey(PROGRAM[wi].days[di].lifts[li][0]); if(!key)return 0;
+  const role=TPL[wi].days[di].lifts[li][0]; if(role==='warmup'||role==='rest')return 0;
   const curPos=wi*1000+di*100+li; let best=-1,bd=0;
-  PROGRAM.forEach((wk,wj)=>wk.days.forEach((d,dj)=>d.lifts.forEach((l,lj)=>{
-    if(l[5]!==1||infoKey(l[0])!==key)return;
+  TPL.forEach((wk,wj)=>wk.days.forEach((d,dj)=>d.lifts.forEach((l,lj)=>{
+    if(l[5]!==1||l[0]!==role)return;
     const pos=wj*1000+dj*100+lj; if(pos>=curPos)return;
-    const fv=S.actuals[`${wj}_${dj}_${lj}`]; if(!fv)return;
-    const d=deltaFromFeel(fv,parseFloat(String(l[4]||'').replace('RPE',''))); if(d===null)return;
-    if(pos>best){best=pos;bd=d;}
+    const fv=S.actuals[`${S.lift}_${wj}_${dj}_${lj}`]; if(!fv)return;
+    const dd=deltaFromFeel(fv,parseFloat(String(l[4]||'').replace('RPE',''))); if(dd===null)return;
+    if(pos>best){best=pos;bd=dd;}
   })));
   return best>=0?bd:0;
 }
+
+/* ===== Render ===== */
 function render(){
+  // header / tabs / setup
+  const m=LIFTMETA[S.lift],c=cfg();
+  document.getElementById('liftname').textContent=m.short;
+  document.getElementById('dispcur').textContent=fmt(c.cur);
+  document.getElementById('disptgt').textContent=fmt(c.tgt)+' KG';
+  document.getElementById('setuplbl').textContent=m.jp+'｜目標設定';
+  document.getElementById('curin').value=c.cur;
+  document.getElementById('tgtin').value=c.tgt;
+  renderTabs(); renderFeasib();
+
   app.innerHTML='';
-  PROGRAM.forEach((wk,wi)=>{
-    const ids=[]; wk.days.forEach((d,di)=>d.lifts.forEach((l,li)=>ids.push(`${wi}_${di}_${li}`)));
+  TPL.forEach((wk,wi)=>{
+    const ids=[]; wk.days.forEach((d,di)=>d.lifts.forEach((l,li)=>{if(l[0]!=='rest')ids.push(`${S.lift}_${wi}_${di}_${li}`);}));
     const done=ids.filter(id=>S.checks[id]).length, tot=ids.length, all=done===tot&&tot>0;
     const card=document.createElement('div');
     card.className='wk'+(S.open===wi?' open':'')+(all?' alldone':'');
     card.style.setProperty('--phase',wk.c);
     let body=`<div class="intro">${wk.intro}</div>`;
     wk.days.forEach((d,di)=>{
-      const dkey=`${wi}_${di}`;
+      const dkey=`${S.lift}_${wi}_${di}`;
       body+=`<div class="day"><div class="dayhead"><span class="dayname">${d.n}</span>`+
         `<input class="dateinp" type="date" value="${S.dates[dkey]||''}" onchange="setDate('${dkey}',this.value)"></div>`;
       d.lifts.forEach((l,li)=>{
-        const id=`${wi}_${di}_${li}`, ck=!!S.checks[id];
-        const [name,w,reps,sets,rpe,kind]=l;
+        const id=`${S.lift}_${wi}_${di}_${li}`, ck=!!S.checks[id];
+        const [role,pct,reps,sets,rpe,kind,labOv]=l;
+        const name=labOv||m.names[role];
+        const w=kind===0?0:weightOf(wi,pct);
         let nums='';
         if(kind===0){nums='';}
         else if(kind===3){nums=`<div class="exnums warm">${fmt(w)}<span class="lt">kg ×${reps}</span></div>`;}
         else if(kind===2){nums=`<div class="exnums speed">${fmt(w)}<span class="lt">kg × ${reps}回 × ${sets}set</span></div>`;}
         else{nums=`<div class="exnums">${fmt(w)}<span class="lt">kg × ${reps}回 × ${sets}set</span></div>`;}
         if(kind===1){const sg=priorDelta(wi,di,li); if(sg!==0){nums=nums.replace('</div>',`<span class="suggest">推奨 ${fmt(w+sg)}kg</span></div>`);}}
-        const rpebadge=rpe?`<span class="rpe">${rpe}</span>`:'';
+        let rpebadge='';
+        if(kind===1&&rpe)rpebadge=`<span class="rpe">${rpe}</span>`;
+        else if(kind===2)rpebadge=`<span class="rpe">速度${Math.round(pct*100)}%</span>`;
         let actual='';
         if(kind===1){
           const sel=S.actuals[id]||'';
           const FEEL=[['','— 実測を記録 —'],['1','楽だった（あと5回以上）'],['2','やや余裕（あと3〜4回）'],['3','ちょうど（あと2回）'],['4','きつい（あと1回）'],['5','限界（もう上がらない）']];
           const opts=FEEL.map(([v,t])=>`<option value="${v}"${v===sel?' selected':''}>${t}</option>`).join('');
           let reco='';
-          if(sel){const tR=parseFloat(String(rpe||'').replace('RPE','')); const d=deltaFromFeel(sel,tR);
-            if(d!==null){ if(d>0)reco=`<div class="reco up">▲ 軽め → 次回 +${d}kg を検討</div>`;
-              else if(d<0)reco=`<div class="reco down">▼ ${d<=-5?'重すぎ':'やや重い'} → 次回 ${d}kg・無理は禁物</div>`;
+          if(sel){const tR=parseFloat(String(rpe||'').replace('RPE','')); const dd=deltaFromFeel(sel,tR);
+            if(dd!==null){ if(dd>0)reco=`<div class="reco up">▲ 軽め → 次回 +${dd}kg を検討</div>`;
+              else if(dd<0)reco=`<div class="reco down">▼ ${dd<=-5?'重すぎ':'やや重い'} → 次回 ${dd}kg・無理は禁物</div>`;
               else reco=`<div class="reco ok">✓ 狙い通り（RPE${tR}）→ 重量維持でOK</div>`; }}
           actual=`<div class="actual"><select onchange="setAct('${id}',this.value)">${opts}</select>${reco}</div>`;
         }
-        const ik=infoKey(name);
-        const nameHtml=ik?`<div class="exname tappable" onclick="openInfo('${ik}')">${name}<span class="info">ⓘやり方</span></div>`:`<div class="exname">${name}</div>`;
-        body+=`<div class="ex${ck?' done':''}${kind===0?' rest':''}" >`+
-          `<div class="chk" onclick="toggle('${id}')"><svg viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg></div>`+
+        const tappable=(role!=='rest');
+        const nameHtml=tappable?`<div class="exname tappable" onclick="openInfo('${role}')">${name}<span class="info">ⓘやり方</span></div>`:`<div class="exname">${name}</div>`;
+        body+=`<div class="ex${ck?' done':''}${kind===0?' rest':''}">`+
+          (kind===0?`<div class="chk" style="visibility:hidden"></div>`:`<div class="chk" onclick="toggle('${id}')"><svg viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg></div>`)+
           `<div class="exmain">${nameHtml}${nums}${actual}</div>${rpebadge}</div>`;
       });
-      body+=`<div class="memo">${d.memo}</div></div>`;
+      body+=`<div class="memo">${m.acc[d.dt]||''}</div></div>`;
     });
     card.innerHTML=`<div class="wkhead" onclick="toggleWk(${wi})">`+
       `<div class="ttl"><div class="lab">${wk.lab}</div><div class="phase">${wk.ph}</div></div>`+
@@ -442,36 +560,59 @@ function render(){
   });
   updateBar();
 }
+function renderTabs(){
+  const t=document.getElementById('tabs');
+  t.innerHTML=LIFTS.map(k=>`<button class="tab${S.lift===k?' on':''}" onclick="switchLift('${k}')">${LIFTMETA[k].short}</button>`).join('');
+}
+function renderFeasib(){
+  const c=cfg(),el=document.getElementById('feasib');
+  const cur=parseFloat(c.cur),tgt=parseFloat(c.tgt);
+  if(isNaN(cur)||isNaN(tgt)||cur<=0||tgt<=0){el.className='feasib warn';el.textContent='現在値と目標値を入力してください。';return;}
+  if(tgt<=cur){el.className='feasib warn';el.textContent='目標が現在値以下です。目標を現在値より上に設定してください。';return;}
+  const gain=tgt-cur, pct=gain/cur*100;
+  const perMonth=gain/3; // 12週=約3ヶ月
+  let cls,msg;
+  if(pct<=6){cls='ok';msg='妥当な目標。12週で十分到達が狙えます。';}
+  else if(pct<=12){cls='ok';msg='挑戦的だが現実的。フォームと回復を整えれば到達可能。';}
+  else if(pct<=20){cls='warn';msg='かなり攻めた目標。栄養・睡眠・補助種目を徹底。未達でも自己ベスト更新が狙えます。';}
+  else{cls='bad';msg='12週(1サイクル)では大きすぎる伸び幅かも。複数サイクルに分けるのが安全です。';}
+  el.className='feasib '+cls;
+  el.innerHTML=`+${fmt(gain)}kg（+${pct.toFixed(1)}%／約${fmt(Math.round(perMonth*10)/10)}kg/月）<br>${msg}`;
+}
 function updateBar(){
   let done=0,tot=0;
-  PROGRAM.forEach((wk,wi)=>wk.days.forEach((d,di)=>d.lifts.forEach((l,li)=>{tot++; if(S.checks[`${wi}_${di}_${li}`])done++;})));
+  TPL.forEach((wk,wi)=>wk.days.forEach((d,di)=>d.lifts.forEach((l,li)=>{if(l[0]==='rest')return;tot++; if(S.checks[`${S.lift}_${wi}_${di}_${li}`])done++;})));
   const p=tot?Math.round(done/tot*100):0;
-  const C=131.9, off=C*(1-p/100);
+  const CC=131.9, off=CC*(1-p/100);
   const rf=document.getElementById('ringfill'); if(rf)rf.style.strokeDashoffset=off.toFixed(1);
   document.getElementById('pctlabel').textContent=p+'%';
   const cl=document.getElementById('countlabel'); if(cl)cl.textContent=done+'/'+tot;
 }
 function flash(){const t=document.getElementById('savetag'); t.textContent='✓ 保存しました'; t.style.color='var(--ok)';
   clearTimeout(window._ft); window._ft=setTimeout(()=>{t.textContent='✓ 自動保存';t.style.color='';},1200);}
+
+/* ===== Actions ===== */
+function switchLift(k){if(S.lift===k)return; S.lift=k; S.open=0; save(); render(); window.scrollTo({top:0,behavior:'smooth'});}
+function setCfg(field,v){const n=parseFloat(v); if(!isNaN(n)&&n>0)cfg()[field]=n; save(); flash(); render();}
 function toggle(id){S.checks[id]=!S.checks[id]; if(!S.checks[id])delete S.checks[id]; save(); flash(); render();}
 function setDate(k,v){if(v)S.dates[k]=v;else delete S.dates[k]; save(); flash();}
 function setAct(id,v){if(v)S.actuals[id]=v;else delete S.actuals[id]; save(); flash(); render();}
 function toggleWk(wi){S.open=(S.open===wi?-1:wi); save(); render();
   if(S.open===wi){const el=app.children[wi]; setTimeout(()=>el.scrollIntoView({behavior:'smooth',block:'start'}),60);}}
 function jumpNext(){
-  for(let wi=0;wi<PROGRAM.length;wi++){const wk=PROGRAM[wi];let inc=false;
-    wk.days.forEach((d,di)=>d.lifts.forEach((l,li)=>{if(!S.checks[`${wi}_${di}_${li}`])inc=true;}));
+  for(let wi=0;wi<TPL.length;wi++){const wk=TPL[wi];let inc=false;
+    wk.days.forEach((d,di)=>d.lifts.forEach((l,li)=>{if(l[0]==='rest')return;if(!S.checks[`${S.lift}_${wi}_${di}_${li}`])inc=true;}));
     if(inc){S.open=wi;save();render();const el=app.children[wi];setTimeout(()=>el.scrollIntoView({behavior:'smooth',block:'start'}),60);return;}}
-  toast('全メニュー完了！お疲れさまでした');
+  toast(LIFTMETA[S.lift].jp+'の全メニュー完了！お疲れさまでした');
 }
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1900);}
 async function exportData(){
   const data=JSON.stringify(S,null,2);
-  const fname='bench120_backup_'+new Date().toISOString().slice(0,10)+'.json';
+  const fname='big3_backup_'+new Date().toISOString().slice(0,10)+'.json';
   try{
     const file=new File([data],fname,{type:'application/json'});
     if(navigator.canShare&&navigator.canShare({files:[file]})){
-      await navigator.share({files:[file],title:'BENCH120 バックアップ'});
+      await navigator.share({files:[file],title:'BIG3 PEAK バックアップ'});
       toast('共有先に保存しました'); return;
     }
   }catch(e){ if(e&&e.name==='AbortError')return; }
@@ -482,9 +623,15 @@ async function exportData(){
   }catch(e){toast('書き出しに失敗しました');}
 }
 function importData(inp){const f=inp.files[0];if(!f)return;const r=new FileReader();
-  r.onload=e=>{try{const d=JSON.parse(e.target.result);S=Object.assign({dates:{},checks:{},actuals:{},open:0},d);save();render();toast('復元しました');}catch(err){toast('読み込み失敗');}};
+  r.onload=e=>{try{const d=JSON.parse(e.target.result);
+    S=Object.assign({lift:"bench",cfg:{},dates:{},checks:{},actuals:{},open:0},d);
+    LIFTS.forEach(k=>{if(!S.cfg[k])S.cfg[k]={cur:LIFTMETA[k].cur,tgt:LIFTMETA[k].tgt};});
+    save();render();toast('復元しました');}catch(err){toast('読み込み失敗');}};
   r.readAsText(f);inp.value='';}
-function resetAll(){if(confirm('全ての日付・チェック・実測を消去します。よろしいですか？')){S={dates:{},checks:{},actuals:{},open:0};save();render();toast('リセットしました');}}
+function resetAll(){if(confirm('現在の種目('+LIFTMETA[S.lift].jp+')の日付・チェック・実測を消去します。よろしいですか？\n※目標設定と他種目は残ります')){
+  const pre=S.lift+'_';
+  [['checks'],['dates'],['actuals']].forEach(([k])=>{Object.keys(S[k]).forEach(id=>{if(id.indexOf(pre)===0)delete S[k][id];});});
+  save();render();toast('リセットしました');}}
 render();
 </script>
 </body>
