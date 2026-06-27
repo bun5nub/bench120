@@ -6,9 +6,9 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="BIG3 PEAK">
+<meta name="apple-mobile-web-app-title" content="BIG3 FORGE">
 <meta name="theme-color" content="#0a0a0b">
-<title>BIG3 PEAK ｜ 目標から自動設計</title>
+<title>BIG3 FORGE ｜ 目標から自動設計</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;600;700;800;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -708,7 +708,7 @@ async function exportData(){
   try{
     const file=new File([data],fname,{type:'application/json'});
     if(navigator.canShare&&navigator.canShare({files:[file]})){
-      await navigator.share({files:[file],title:'BIG3 PEAK バックアップ'});
+      await navigator.share({files:[file],title:'BIG3 FORGE バックアップ'});
       toast('共有先に保存しました'); return;
     }
   }catch(e){ if(e&&e.name==='AbortError')return; }
